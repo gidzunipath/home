@@ -31,9 +31,10 @@ import {
   FaCopy,
   FaQuestionCircle,
   FaLightbulb,
+  FaGlobe,
 } from "react-icons/fa";
 import { supabase } from "../../../lib/supabase";
-import { useRouter } from "next/navigation"; // Add useRouter
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuthSystem, AUTH_TYPES } from "../../../hooks/useAuthSystem";
 import Universities from "./components/Universities";
 import DocumentsToDownload from "./components/DocumentsToDownload";
@@ -50,6 +51,18 @@ import FeedbackDialog from "./components/FeedbackDialog";
 import Image from "next/image";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+
+/** Tab ids accepted in `?tab=` so refresh and shared links restore the same view. */
+const VALID_CLIENT_TAB_IDS = new Set([
+  "overview",
+  "documents",
+  "universities",
+  "tasks",
+  "support",
+  "profile",
+  "german-life",
+  "timeline",
+]);
 
 const ApplicantDetail = () => {
   const [applicant, setApplicant] = useState(null);
@@ -235,6 +248,27 @@ const ApplicantDetail = () => {
   }, []); // Empty dependency array since the function doesn't depend on any external variables
 
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const navigateToTab = useCallback(
+    (tabId) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", tabId);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const tabFromUrl = searchParams.get("tab");
+  useEffect(() => {
+    if (tabFromUrl && VALID_CLIENT_TAB_IDS.has(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    } else {
+      setActiveTab("overview");
+    }
+  }, [tabFromUrl]);
+
   const {
     type: authType,
     user,
@@ -796,7 +830,7 @@ const ApplicantDetail = () => {
 
               <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-appleGray-800 mb-2 px-4">
-                  Client Portal
+                  Student Portal
                 </h1>
                 <p className="text-lg sm:text-xl text-appleGray-600 px-4">
                   Welcome back, {applicant.first_name} {applicant.last_name}
@@ -1099,6 +1133,7 @@ const ApplicantDetail = () => {
                 {[
                   { id: "overview", label: "Overview", icon: FaChartLine },
                   // { id: "timeline", label: "Timeline", icon: FaCalendarAlt },
+                  { id: "support", label: "Support", icon: FaLifeRing },
                   { id: "documents", label: "Documents", icon: FaFileAlt },
                   {
                     id: "universities",
@@ -1106,8 +1141,12 @@ const ApplicantDetail = () => {
                     icon: FaUniversity,
                   },
                   { id: "tasks", label: "Visa", icon: FaPassport },
-                  { id: "support", label: "Support", icon: FaLifeRing },
                   { id: "profile", label: "Profile", icon: FaUserEdit },
+                  {
+                    id: "german-life",
+                    label: "German life",
+                    icon: FaGlobe,
+                  },
                 ].map((tab) => {
                   const isVisaTabLocked =
                     tab.id === "tasks" && applicant?.lock_1;
@@ -1117,7 +1156,7 @@ const ApplicantDetail = () => {
                       key={`mobile-${tab.id}`}
                       onClick={() => {
                         if (!isVisaTabLocked) {
-                          setActiveTab(tab.id);
+                          navigateToTab(tab.id);
                         }
                       }}
                       disabled={isVisaTabLocked}
@@ -1174,6 +1213,11 @@ const ApplicantDetail = () => {
                   },
                   { id: "tasks", label: "Visa", icon: FaPassport },
                   { id: "support", label: "Support", icon: FaLifeRing },
+                  {
+                    id: "german-life",
+                    label: "German life",
+                    icon: FaGlobe,
+                  },
                   { id: "profile", label: "Profile", icon: FaUserEdit },
                 ].map((tab) => {
                   const isVisaTabLocked =
@@ -1184,7 +1228,7 @@ const ApplicantDetail = () => {
                       key={tab.id}
                       onClick={() => {
                         if (!isVisaTabLocked) {
-                          setActiveTab(tab.id);
+                          navigateToTab(tab.id);
                         }
                       }}
                       disabled={isVisaTabLocked}
@@ -2190,6 +2234,20 @@ const ApplicantDetail = () => {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "german-life" && (
+                <div className="p-6 sm:p-8 flex items-center justify-center min-h-[320px] sm:min-h-[400px]">
+                  <div className="text-center max-w-md">
+                    <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaGlobe className="w-8 h-8 text-sky-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-appleGray-800 mb-2">
+                      German life
+                    </h3>
+                    <p className="text-appleGray-600 text-lg">Coming soon</p>
                   </div>
                 </div>
               )}

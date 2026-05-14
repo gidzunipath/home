@@ -1,9 +1,14 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import Nav from "../components/nav-german";
 
 export default function AdminLayout({ children }) {
+  const pathname = usePathname();
+  const hideNav =
+    pathname === "/admin/messages" ||
+    (pathname?.startsWith("/admin/messages/") ?? false);
   const { loading, isAuthenticated } = useAdminAuth();
 
   if (loading) {
@@ -38,12 +43,24 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-appleGray-50">
-      {/* Use the existing navigation */}
-      <Nav />
+    <div
+      className={
+        hideNav
+          ? "flex flex-col flex-1 min-h-0 h-full bg-appleGray-50"
+          : "min-h-screen bg-appleGray-50"
+      }
+    >
+      {!hideNav && <Nav />}
 
-      {/* Page Content */}
-      <main className="min-h-screen pt-4">{children}</main>
+      <main
+        className={
+          hideNav
+            ? "flex flex-1 min-h-0 flex-col overflow-hidden"
+            : "min-h-screen pt-4"
+        }
+      >
+        {children}
+      </main>
     </div>
   );
 }

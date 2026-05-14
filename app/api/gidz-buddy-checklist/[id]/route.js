@@ -2,7 +2,10 @@ import { supabase } from "../../../../lib/supabase";
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
+    if (!id) {
+      return Response.json({ error: "ID is required" }, { status: 400 });
+    }
     const body = await request.json();
     const { title, description, youtube_link, is_active, display_order } = body;
 
@@ -56,7 +59,11 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
+
+    if (!id) {
+      return Response.json({ error: "ID is required" }, { status: 400 });
+    }
 
     // Delete checklist item
     const { error } = await supabase
@@ -84,7 +91,11 @@ export async function DELETE(request, { params }) {
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
+
+    if (!id) {
+      return Response.json({ error: "ID is required" }, { status: 400 });
+    }
 
     // Fetch specific checklist item
     const { data, error } = await supabase

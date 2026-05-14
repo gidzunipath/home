@@ -171,7 +171,7 @@ export default function Nav() {
                   aria-haspopup="true"
                   aria-expanded={isVisaDropdownOpen}
                 >
-                  <span>Visa Services</span>
+                  <span>Visa Apply</span>
                   <FaChevronDown
                     className={`w-3 h-3 transition-transform duration-200 ${
                       isVisaDropdownOpen ? "rotate-180" : ""
@@ -412,7 +412,7 @@ export default function Nav() {
                     onClick={toggleMobileVisa}
                     className="flex items-center justify-between w-full text-appleGray-700 hover:text-sky-500 font-medium py-2 transition-colors duration-200"
                   >
-                    <span>Visa Services</span>
+                    <span>Visa Apply</span>
                     <FaChevronDown
                       className={`w-3 h-3 transition-transform duration-200 ${
                         isMobileVisaOpen ? "rotate-180" : ""
