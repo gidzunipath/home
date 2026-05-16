@@ -317,6 +317,7 @@ export const useAuthSystem = () => {
           showApplications: false,
           showCheckStatus: true,
           showContact: true,
+          showCareers: true,
           primaryAction: {
             type: "link",
             href: `/client/${authState.user?.id}`,
@@ -390,6 +391,7 @@ export const useAuthSystem = () => {
           showApplications: true,
           showCheckStatus: false, // Hide Check Status for admin
           showContact: false, // Hide Contact for admin
+          showCareers: false,
           showAdminDropdown: true, // Add admin-specific dropdown
           adminDropdownItems,
           primaryAction: {
@@ -413,6 +415,7 @@ export const useAuthSystem = () => {
           showApplications: false, // Only admins should see Applications menu
           showCheckStatus: true,
           showContact: true,
+          showCareers: true,
           primaryAction: {
             type: "link",
             href: "/login",

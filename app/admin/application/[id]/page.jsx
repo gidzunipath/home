@@ -652,7 +652,7 @@ const ApplicantDetail = () => {
   if (!applicant) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
-        <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="p-6 pb-12 sm:p-8">
           <div className="max-w-6xl mx-auto">
             <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-8 text-center">
               <div className="animate-pulse">
@@ -674,7 +674,7 @@ const ApplicantDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
       {/* Top spacing for navbar */}
-      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="p-6 pb-12 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 lg:p-8">

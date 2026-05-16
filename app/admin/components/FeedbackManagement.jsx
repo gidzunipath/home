@@ -172,7 +172,7 @@ const FeedbackManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-appleGray-50 via-white to-sky-50 pt-24 p-6">
+    <div className="bg-gradient-to-br from-appleGray-50 via-white to-sky-50 p-6 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

@@ -118,47 +118,30 @@ const EntriesPage = () => {
   }, [currentUser]);
 
   return (
-    <div className="min-h-screen bg-appleGray-50">
-      {/* Header Section with navbar gap */}
-      <div className="pt-20">
-        {/* Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div
-            className={`bg-gradient-to-r ${
-              Steps.find((s) => s.value === currentStep)?.color ||
-              "from-sky-400 to-blue-600"
-            } rounded-3xl shadow-large border border-white/20 p-6 mb-8 text-white`}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <h2 className="text-xl font-semibold text-white">
-                Application Types
-              </h2>
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+    <div className="bg-appleGray-100 p-5 sm:p-6">
+      <div>
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-2xl border border-appleGray-200 p-4 mb-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               {/* Navigation Buttons */}
-              <div className="flex gap-4">
+              <div className="flex items-center gap-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-appleGray-400 mr-1">
+                  Type
+                </p>
                 {Steps.map((step) => (
                   <button
                     key={step.value}
                     onClick={() => setCurrentStep(step.value)}
-                    className={`flex items-center space-x-3 px-6 py-4 rounded-2xl transition-all duration-300 font-medium whitespace-nowrap ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                       currentStep === step.value
-                        ? `bg-white/20 backdrop-blur-sm text-white shadow-lg transform scale-105 border border-white/30`
-                        : "bg-white/10 backdrop-blur-sm text-white/80 hover:bg-white/15 hover:text-white hover:shadow-md"
+                        ? "bg-sky-500 text-white shadow-sm"
+                        : "bg-appleGray-100 text-appleGray-600 hover:bg-appleGray-200"
                     }`}
                   >
-                    <Icon
-                      icon={step.icon}
-                      className={`text-xl ${
-                        currentStep === step.value
-                          ? "text-white"
-                          : "text-white/70"
-                      }`}
-                    />
+                    <Icon icon={step.icon} className="text-base" />
                     <span>{step.label}</span>
                     {currentStep === step.value && (
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      <div className="w-1.5 h-1.5 bg-white/80 rounded-full"></div>
                     )}
                   </button>
                 ))}
@@ -166,37 +149,24 @@ const EntriesPage = () => {
 
               {/* Statistics Panel */}
               {!isLoading && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 w-full lg:w-auto lg:min-w-[280px] lg:max-w-[320px] flex-shrink-0 border border-white/20">
-                  <div className="text-center mb-3">
-                    <div className="text-2xl font-bold text-white">
-                      {Steps.find((s) => s.value === currentStep)?.stats
-                        .total || 0}
+                <div className="flex items-center gap-3">
+                  <div className="bg-appleGray-50 border border-appleGray-200 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                    <div className="text-lg font-bold text-appleGray-900">
+                      {Steps.find((s) => s.value === currentStep)?.stats.total || 0}
                     </div>
-                    <div className="text-sm text-white/80 font-medium">
-                      Total {currentStep} Applications
-                    </div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-appleGray-400">Total</div>
                   </div>
-                  <div className="flex justify-center items-center space-x-4 lg:space-x-6 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-300 rounded-full flex-shrink-0"></div>
-                      <span className="text-white/90 whitespace-nowrap">
-                        <span className="font-semibold">
-                          {Steps.find((s) => s.value === currentStep)?.stats
-                            .read || 0}
-                        </span>{" "}
-                        Read
-                      </span>
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                    <div className="text-lg font-bold text-emerald-700">
+                      {Steps.find((s) => s.value === currentStep)?.stats.read || 0}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-orange-300 rounded-full flex-shrink-0"></div>
-                      <span className="text-white/90 whitespace-nowrap">
-                        <span className="font-semibold">
-                          {Steps.find((s) => s.value === currentStep)?.stats
-                            .unread || 0}
-                        </span>{" "}
-                        Unread
-                      </span>
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-500">Read</div>
+                  </div>
+                  <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                    <div className="text-lg font-bold text-amber-700">
+                      {Steps.find((s) => s.value === currentStep)?.stats.unread || 0}
                     </div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-500">Unread</div>
                   </div>
                 </div>
               )}
@@ -204,7 +174,7 @@ const EntriesPage = () => {
           </div>
 
           {/* Content Area */}
-          <div className="transition-all duration-500 ease-in-out">
+          <div className="transition-all duration-300 ease-in-out">
             {currentStep === "Student" ? <StudentQuery /> : <WorkQuery />}
           </div>
         </div>

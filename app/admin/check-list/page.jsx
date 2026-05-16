@@ -11,7 +11,7 @@ const ChecklistPage = () => {
   // Show loading state while authenticating
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-appleGray-50 pt-24 p-6">
+      <div className="p-6 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-3xl p-8 shadow-soft border border-appleGray-200 text-center">
             <div className="animate-pulse">
@@ -26,7 +26,7 @@ const ChecklistPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-appleGray-50 pt-24 p-6">
+    <div className="p-6 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

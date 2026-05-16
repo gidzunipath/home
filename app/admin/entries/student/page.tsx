@@ -411,12 +411,12 @@ const StudentQuery = () => {
   };
 
   return (
-    <div className="min-h-screen bg-appleGray-50">
+    <div className="bg-appleGray-100">
       {isLoading ? (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-appleGray-600">
+            <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-sm text-appleGray-500">
               Loading student applications...
             </p>
           </div>
@@ -424,110 +424,97 @@ const StudentQuery = () => {
       ) : (
         <>
           {/* Main Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-0">
             {/* Search and Filters */}
-            <div className="bg-white rounded-3xl shadow-large border border-appleGray-200 p-6 mb-8">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex-1 max-w-md">
+            <div className="bg-white rounded-2xl border border-appleGray-200 p-4 mb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div className="flex-1 max-w-sm">
                   <div className="relative">
                     <Icon
                       icon="material-symbols:search"
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-appleGray-400 text-xl"
+                      className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-appleGray-400 text-lg"
                     />
                     <input
                       type="text"
                       placeholder="Search students..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-appleGray-100 border border-appleGray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-9 pr-4 py-2 bg-appleGray-50 border border-appleGray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 text-sm"
                     />
                   </div>
                 </div>
-                <div className="text-sm text-appleGray-600">
-                  Showing {filteredStudents.length} of {students.length}{" "}
-                  applications
+                <div className="text-xs text-appleGray-400 font-medium">
+                  {filteredStudents.length} of {students.length} applications
                 </div>
               </div>
             </div>
 
             {/* Students Table */}
-            <div className="bg-white rounded-3xl shadow-large border border-appleGray-200 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-appleGray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-appleGray-50 border-b border-appleGray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-appleGray-700 uppercase tracking-wider">
-                        <div className="flex items-center space-x-1">
-                          <Icon
-                            icon="material-symbols:person"
-                            className="text-sm"
-                          />
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5">
+                          <Icon icon="material-symbols:person" className="text-sm" />
                           <span>Student</span>
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-appleGray-700 uppercase tracking-wider">
-                        <div className="flex items-center space-x-1">
-                          <Icon
-                            icon="material-symbols:mail"
-                            className="text-sm"
-                          />
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5">
+                          <Icon icon="material-symbols:mail" className="text-sm" />
                           <span>Contact</span>
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-appleGray-700 uppercase tracking-wider">
-                        <div className="flex items-center space-x-1">
-                          <Icon
-                            icon="material-symbols:assignment-ind"
-                            className="text-sm"
-                          />
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5">
+                          <Icon icon="material-symbols:assignment-ind" className="text-sm" />
                           <span>Assignment</span>
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-appleGray-700 uppercase tracking-wider">
-                        <div className="flex items-center justify-center space-x-1">
-                          <Icon
-                            icon="material-symbols:mark-email-read"
-                            className="text-sm"
-                          />
+                      <th className="px-5 py-3 text-center text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Icon icon="material-symbols:mark-email-read" className="text-sm" />
                           <span>Status</span>
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-appleGray-700 uppercase tracking-wider">
+                      <th className="px-5 py-3 text-center text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-appleGray-200">
+                  <tbody>
                     {filteredStudents.map((student) => (
                       <tr
                         key={student.id}
-                        className="hover:bg-appleGray-50 transition-colors duration-200"
+                        className="border-b border-appleGray-100 last:border-b-0 hover:bg-appleGray-50 transition-colors duration-150"
                       >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                               <Icon
                                 icon="material-symbols:person"
                                 className="text-white text-sm"
                               />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-medium text-appleGray-800 text-sm truncate">
+                              <div className="text-sm font-semibold text-appleGray-900 truncate">
                                 {student.PersonalInformation?.FirstName}{" "}
                                 {student.PersonalInformation?.LastName}
                               </div>
-                              <div className="text-xs text-appleGray-500 truncate">
-                                ID: {student.id}
+                              <div className="text-xs text-appleGray-400 font-mono truncate">
+                                #{student.id}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="text-sm text-appleGray-800 truncate">
+                        <td className="px-5 py-3.5">
+                          <div className="text-sm text-appleGray-600 truncate">
                             {student.ContactInformation?.Email}
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-3.5">
                           {(() => {
                             // Debug assignment display
                             console.log(
@@ -603,7 +590,7 @@ const StudentQuery = () => {
                             }
                           })()}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-5 py-3.5 text-center">
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input
                               type="checkbox"
@@ -619,11 +606,11 @@ const StudentQuery = () => {
                             </span>
                           </label>
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="flex justify-center space-x-2">
+                        <td className="px-5 py-3.5">
+                          <div className="flex justify-center gap-1.5">
                             <button
                               onClick={() => openNewTab(student)}
-                              className="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-xl transition-colors duration-200 flex items-center space-x-1 text-xs font-medium shadow-md hover:shadow-lg"
+                              className="bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-100 px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 text-xs font-medium"
                             >
                               <Icon
                                 icon="material-symbols:visibility"
@@ -634,7 +621,7 @@ const StudentQuery = () => {
                             {currentUser?.role !== "staff" && (
                               <button
                                 onClick={() => confirmDelete(student.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-xl transition-colors duration-200 flex items-center space-x-1 text-xs font-medium shadow-md hover:shadow-lg"
+                                className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 text-xs font-medium"
                               >
                                 <Icon
                                   icon="material-symbols:delete"
@@ -652,19 +639,21 @@ const StudentQuery = () => {
 
                 {/* Empty State */}
                 {filteredStudents.length === 0 && (
-                  <div className="text-center py-12">
-                    <Icon
-                      icon="material-symbols:search-off"
-                      className="text-6xl text-appleGray-400 mx-auto mb-4"
-                    />
-                    <h3 className="text-xl font-semibold text-appleGray-700 mb-2">
+                  <div className="text-center py-10">
+                    <div className="w-12 h-12 bg-appleGray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <Icon
+                        icon="material-symbols:search-off"
+                        className="text-2xl text-appleGray-400"
+                      />
+                    </div>
+                    <h3 className="text-sm font-semibold text-appleGray-700 mb-1">
                       {searchTerm
                         ? "No students found"
                         : currentUser?.role === "staff"
                         ? "No assigned applications"
                         : "No student applications yet"}
                     </h3>
-                    <p className="text-appleGray-600">
+                    <p className="text-xs text-appleGray-400">
                       {searchTerm
                         ? "Try adjusting your search criteria"
                         : currentUser?.role === "staff"
@@ -682,61 +671,48 @@ const StudentQuery = () => {
             <>
               <ModalBackdrop onClick={() => setIsAssignModalOpen(false)} />
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in">
-                <div className="bg-white rounded-3xl shadow-large border border-appleGray-200 w-full max-w-md">
-                  {/* Modal Header */}
-                  <div className="border-b border-appleGray-200 px-8 py-6 rounded-t-3xl">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-bold text-appleGray-800">
-                        Assign Staff Member
-                      </h2>
-                      <button
-                        onClick={() => setIsAssignModalOpen(false)}
-                        className="w-10 h-10 bg-appleGray-100 hover:bg-appleGray-200 rounded-2xl flex items-center justify-center transition-colors duration-200"
-                      >
-                        <Icon
-                          icon="material-symbols:close"
-                          className="text-xl text-appleGray-600"
-                        />
-                      </button>
-                    </div>
+                <div className="bg-white rounded-2xl border border-appleGray-200 shadow-medium w-full max-w-md">
+                  <div className="border-b border-appleGray-100 px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-appleGray-900">
+                      Assign Staff Member
+                    </h2>
+                    <button
+                      onClick={() => setIsAssignModalOpen(false)}
+                      className="w-8 h-8 bg-appleGray-100 hover:bg-appleGray-200 rounded-xl flex items-center justify-center transition-colors duration-200"
+                    >
+                      <Icon icon="material-symbols:close" className="text-lg text-appleGray-500" />
+                    </button>
                   </div>
 
-                  {/* Modal Body */}
-                  <div className="p-8">
-                    <div className="mb-6">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                          <Icon
-                            icon="material-symbols:person"
-                            className="text-white text-xl"
-                          />
+                  <div className="p-6">
+                    <div className="mb-5">
+                      <div className="flex items-center gap-3 mb-4 p-3 bg-appleGray-50 rounded-xl border border-appleGray-100">
+                        <div className="w-9 h-9 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center shrink-0">
+                          <Icon icon="material-symbols:person" className="text-white text-base" />
                         </div>
                         <div>
-                          <div className="font-semibold text-appleGray-800">
+                          <div className="text-sm font-semibold text-appleGray-900">
                             {studentToAssign?.PersonalInformation?.FirstName}{" "}
                             {studentToAssign?.PersonalInformation?.LastName}
                           </div>
-                          <div className="text-sm text-appleGray-600">
+                          <div className="text-xs text-appleGray-400">
                             {studentToAssign?.ContactInformation?.Email}
                           </div>
                         </div>
                       </div>
 
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-appleGray-700 mb-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-appleGray-500 uppercase tracking-wider mb-2">
                           Select Staff Member
                         </label>
                         <select
                           value={selectedStaffId}
                           onChange={(e) => setSelectedStaffId(e.target.value)}
-                          className="w-full px-4 py-3 bg-appleGray-100 border border-appleGray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                          className="w-full px-3 py-2.5 bg-appleGray-50 border border-appleGray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 text-sm"
                         >
                           <option value="">Choose staff member...</option>
                           {(() => {
-                            console.log(
-                              "🔍 Rendering staff members:",
-                              staffMembers
-                            );
+                            console.log("🔍 Rendering staff members:", staffMembers);
                             return staffMembers.map((staff) => (
                               <option key={staff.id} value={staff.id}>
                                 {staff.first_name} {staff.last_name} -{" "}
@@ -747,25 +723,24 @@ const StudentQuery = () => {
                           })()}
                         </select>
                         {staffMembers.length === 0 && (
-                          <p className="text-sm text-red-500 mt-2">
-                            No staff members available. Check console for
-                            errors.
+                          <p className="text-xs text-red-500 mt-2">
+                            No staff members available. Check console for errors.
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex space-x-4">
+                    <div className="flex gap-2.5">
                       <button
                         onClick={assignStudent}
                         disabled={!selectedStaffId}
-                        className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:bg-appleGray-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-2xl font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
+                        className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:bg-appleGray-200 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
                       >
                         Assign Student
                       </button>
                       <button
                         onClick={() => setIsAssignModalOpen(false)}
-                        className="flex-1 bg-appleGray-200 hover:bg-appleGray-300 text-appleGray-800 px-6 py-3 rounded-2xl font-medium transition-colors duration-200"
+                        className="flex-1 bg-appleGray-100 hover:bg-appleGray-200 text-appleGray-700 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
                       >
                         Cancel
                       </button>
@@ -781,54 +756,42 @@ const StudentQuery = () => {
             <>
               <ModalBackdrop onClick={() => setIsDeleteModalOpen(false)} />
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in">
-                <div className="bg-white rounded-3xl shadow-large border border-appleGray-200 w-full max-w-md">
-                  {/* Modal Header */}
-                  <div className="border-b border-appleGray-200 px-8 py-6 rounded-t-3xl">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-bold text-appleGray-800">
-                        Confirm Deletion
-                      </h2>
-                      <button
-                        onClick={() => setIsDeleteModalOpen(false)}
-                        className="w-10 h-10 bg-appleGray-100 hover:bg-appleGray-200 rounded-2xl flex items-center justify-center transition-colors duration-200"
-                      >
-                        <Icon
-                          icon="material-symbols:close"
-                          className="text-xl text-appleGray-600"
-                        />
-                      </button>
-                    </div>
+                <div className="bg-white rounded-2xl border border-appleGray-200 shadow-medium w-full max-w-md">
+                  <div className="border-b border-appleGray-100 px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-base font-bold text-appleGray-900">
+                      Confirm Deletion
+                    </h2>
+                    <button
+                      onClick={() => setIsDeleteModalOpen(false)}
+                      className="w-8 h-8 bg-appleGray-100 hover:bg-appleGray-200 rounded-xl flex items-center justify-center transition-colors duration-200"
+                    >
+                      <Icon icon="material-symbols:close" className="text-lg text-appleGray-500" />
+                    </button>
                   </div>
 
-                  {/* Modal Body */}
-                  <div className="p-8">
-                    <div className="text-center mb-6">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Icon
-                          icon="material-symbols:warning"
-                          className="text-2xl text-red-600"
-                        />
+                  <div className="p-6">
+                    <div className="text-center mb-5">
+                      <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-red-100">
+                        <Icon icon="material-symbols:warning" className="text-xl text-red-500" />
                       </div>
-                      <h3 className="text-lg font-semibold text-appleGray-800 mb-2">
-                        Are you sure you want to delete this student
-                        application?
+                      <h3 className="text-sm font-semibold text-appleGray-900 mb-1.5">
+                        Are you sure you want to delete this student application?
                       </h3>
-                      <p className="text-appleGray-600">
-                        This action cannot be undone. All student data will be
-                        permanently removed.
+                      <p className="text-xs text-appleGray-400">
+                        This action cannot be undone. All student data will be permanently removed.
                       </p>
                     </div>
 
-                    <div className="flex space-x-4">
+                    <div className="flex gap-2.5">
                       <button
                         onClick={deleteStudent}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-2xl font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
                       >
                         Yes, Delete
                       </button>
                       <button
                         onClick={() => setIsDeleteModalOpen(false)}
-                        className="flex-1 bg-appleGray-200 hover:bg-appleGray-300 text-appleGray-800 px-6 py-3 rounded-2xl font-medium transition-colors duration-200"
+                        className="flex-1 bg-appleGray-100 hover:bg-appleGray-200 text-appleGray-700 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
                       >
                         Cancel
                       </button>

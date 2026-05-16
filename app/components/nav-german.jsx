@@ -231,6 +231,16 @@ export default function Nav() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sky-500 transition-all duration-200 group-hover:w-full"></span>
               </Link>
             )} */}
+            {/* Careers - Show based on auth state */}
+            {navConfig.showCareers && (
+              <Link
+                href="/careers"
+                className="text-appleGray-700 hover:text-sky-500 font-medium transition-colors duration-200 relative group"
+              >
+                Careers
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sky-500 transition-all duration-200 group-hover:w-full"></span>
+              </Link>
+            )}
             {/* Contact - Show based on auth state */}
             {navConfig.showContact && (
               <Link
@@ -460,6 +470,16 @@ export default function Nav() {
                   Check Status
                 </Link>
               )} */}
+              {/* Careers - Show based on auth state */}
+              {navConfig.showCareers && (
+                <Link
+                  href="/careers"
+                  className="block text-appleGray-700 hover:text-sky-500 font-medium py-2 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Careers
+                </Link>
+              )}
               {/* Contact - Show based on auth state */}
               {navConfig.showContact && (
                 <Link
