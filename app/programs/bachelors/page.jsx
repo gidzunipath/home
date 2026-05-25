@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { FaArrowLeft, FaGraduationCap, FaImage } from "react-icons/fa";
+import { FaGraduationCap, FaImage } from "react-icons/fa";
 
 /** Portrait ratio for category images (1536 × 2752) */
 const IMAGE_ASPECT = "aspect-[1536/2752]";
@@ -17,7 +16,7 @@ const CATEGORIES = [
     title: "Computer Science & IT",
     description:
       "Explore bachelor's programs in Computer Science, Software Engineering, Artificial Intelligence, Data Science, Cybersecurity, Information Technology, and Business Informatics. Germany is one of Europe's leading destinations for tech education with a large number of English-taught IT programs for international students.",
-    image: null,
+    image: "/programs/bachelors/computerScience.png",
     imageAlt: "Computer Science & IT",
   },
   {
@@ -38,7 +37,7 @@ const CATEGORIES = [
     title: "Biology, Chemistry & Life Sciences",
     description:
       "Discover programs in Biology, Biotechnology, Microbiology, Molecular Biology, Genetics, Biochemistry, and Biomedical Science. Germany is known for its innovation in life sciences and offers many practical and research-oriented study opportunities for international students.",
-    image: null,
+    image: "/programs/bachelors/biology.png",
     imageAlt: "Biology, Chemistry & Life Sciences",
   },
   {
@@ -52,21 +51,21 @@ const CATEGORIES = [
     title: "Social Sciences & Humanities",
     description:
       "Study Psychology, Sociology, Political Science, International Relations, Philosophy, Media Studies, and History at leading German universities. These programs help students build analytical, communication, and global understanding skills for international careers.",
-    image: "/programs/bachelors/socialscience.png",
+    image: "/programs/bachelors/socialScience.png",
     imageAlt: "Social Sciences & Humanities",
   },
   {
     title: "Law & Public Administration",
     description:
       "Choose from programs in Law, European Studies, International Law, Public Administration, and Governance Studies. German universities provide strong legal and public policy education with international perspectives and modern academic environments.",
-    image: "/programs/bachelors/law.png",
+    image: "/programs/bachelors/Law.png",
     imageAlt: "Law & Public Administration",
   },
   {
     title: "Hospitality, Tourism & Sports",
     description:
       "Study Hospitality Management, Tourism Management, Event Management, Sports Science, and International Hospitality Business. Germany offers practical and career-focused education in tourism, hotel management, and global hospitality industries.",
-    image: null,
+    image: "/programs/bachelors/hospitality.png",
     imageAlt: "Hospitality, Tourism & Sports",
   },
 ];
@@ -74,15 +73,15 @@ const CATEGORIES = [
 function CardImage({ image, imageAlt }) {
   return (
     <div
-      className={`relative shrink-0 overflow-hidden bg-appleGray-100 ${IMAGE_ASPECT}`}
+      className={`relative shrink-0 overflow-hidden bg-appleGray-100 sm:rounded-l-2xl ${IMAGE_ASPECT}`}
     >
       {image ? (
         <Image
           src={image}
           alt={imageAlt}
           fill
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 200px"
         />
       ) : (
         <div
@@ -96,16 +95,28 @@ function CardImage({ image, imageAlt }) {
         </div>
       )}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-sky-900/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 bg-sky-900/0 transition-colors duration-300 group-hover:bg-sky-900/15"
         aria-hidden
       />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+        aria-hidden
+      />
+      <div className="absolute inset-x-0 bottom-0 z-10 flex justify-end p-3 sm:p-4">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-all duration-300 group-hover:bg-sky-500 group-hover:shadow-lg sm:h-10 sm:w-10"
+          aria-hidden
+        >
+          <FaGraduationCap className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 sm:h-4 sm:w-4" />
+        </span>
+      </div>
     </div>
   );
 }
 
 function CategoryCard({ title, description, image, imageAlt }) {
   return (
-    <article className="group relative h-full overflow-hidden rounded-2xl border border-appleGray-200/80 bg-white shadow-soft card-apple-hover transition-colors duration-300 hover:border-sky-200">
+    <article className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-appleGray-200/80 bg-white shadow-soft card-apple-hover transition-colors duration-300 hover:border-sky-300">
       <div
         className="absolute inset-x-0 top-0 z-10 h-1 origin-left scale-x-0 bg-gradient-to-r from-sky-500 to-sky-600 transition-transform duration-300 group-hover:scale-x-100"
         aria-hidden

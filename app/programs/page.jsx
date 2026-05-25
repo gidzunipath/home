@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FaMapMarkedAlt } from "react-icons/fa";
+import { FaGraduationCap, FaMapMarkedAlt } from "react-icons/fa";
 import GermanyMap from "../components/home/GermanyMap";
 
 const PROGRAM_LEVELS = [
@@ -24,21 +24,37 @@ function ProgramLevelCard({ title, href, image, imageAlt }) {
   return (
     <Link
       href={href}
-      className="group block overflow-hidden rounded-3xl border border-appleGray-200 bg-white shadow-soft card-apple-hover pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+      aria-label={`Explore ${title} programs in Germany`}
+      className="group relative block cursor-pointer overflow-hidden rounded-3xl border border-appleGray-200 bg-white shadow-soft card-apple-hover transition-colors duration-300 hover:border-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
     >
+      <div
+        className="absolute inset-x-0 top-0 z-10 h-1 origin-left scale-x-0 bg-gradient-to-r from-sky-500 to-sky-600 transition-transform duration-300 group-hover:scale-x-100"
+        aria-hidden
+      />
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-appleGray-100">
         <Image
           src={image}
           alt={imageAlt}
           fill
-          className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
-      </div>
-      <div className="p-6 sm:p-8">
-        <h2 className="text-2xl sm:text-3xl text-center font-bold text-appleGray-800 group-hover:text-sky-600 transition-colors duration-300">
-          {title}
-        </h2>
+        <div
+          className="pointer-events-none absolute inset-0 bg-sky-900/0 transition-colors duration-300 group-hover:bg-sky-900/15"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent"
+          aria-hidden
+        />
+        <div className="absolute inset-x-0 bottom-0 z-10 flex justify-end p-5 sm:p-6">
+          <span
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-all duration-300 group-hover:bg-sky-500 group-hover:shadow-lg"
+            aria-hidden
+          >
+            <FaGraduationCap className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+          </span>
+        </div>
       </div>
     </Link>
   );
@@ -74,7 +90,7 @@ export default function ProgramsPage() {
            
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 sm:mt-12">
           <div className="grid gap-8 md:grid-cols-2">
             {PROGRAM_LEVELS.map((level) => (
               <ProgramLevelCard key={level.title} {...level} />

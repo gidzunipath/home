@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { FaArrowLeft, FaGraduationCap, FaImage } from "react-icons/fa";
+import { FaGraduationCap, FaImage } from "react-icons/fa";
 
 /** Portrait ratio for category images (1536 × 2752) */
 const IMAGE_ASPECT = "aspect-[1536/2752]";
@@ -24,14 +23,14 @@ const CATEGORIES = [
     title: "Business, Management & Economics",
     description:
       "Explore master's degrees in MBA, International Business, Finance, Marketing, Supply Chain Management, Business Analytics, and Economics. German universities combine academic excellence with practical business knowledge and global networking opportunities.",
-    image: null,
+    image: "/programs/masters/Economics.png",
     imageAlt: "Business, Management & Economics",
   },
   {
     title: "Natural Sciences & Mathematics",
     description:
       "Advance your expertise in Physics, Chemistry, Mathematics, Nanotechnology, Environmental Science, and Materials Science. Germany provides world-class research opportunities and innovative scientific education for international students.",
-    image: null,
+    image: "/programs/masters/math.png",
     imageAlt: "Natural Sciences & Mathematics",
   },
   {
@@ -45,14 +44,14 @@ const CATEGORIES = [
     title: "Medical & Health Sciences",
     description:
       "Study Public Health, Healthcare Management, Clinical Research, Nutrition Science, Pharmacy, and Medical Biotechnology in Germany. These programs prepare students for international healthcare careers with strong practical and research components.",
-    image: null,
+    image: "/programs/masters/HealthScience.png",
     imageAlt: "Medical & Health Sciences",
   },
   {
     title: "Agriculture, Food & Environmental Studies",
     description:
       "Explore master's programs in Sustainable Agriculture, Food Technology, Environmental Management, Forestry, Climate Studies, and Nutrition Science. Germany focuses heavily on sustainability, environmental innovation, and modern agricultural technologies.",
-    image: null,
+    image: "/programs/masters/env.png",
     imageAlt: "Agriculture, Food & Environmental Studies",
   },
   {
@@ -81,15 +80,15 @@ const CATEGORIES = [
 function CardImage({ image, imageAlt }) {
   return (
     <div
-      className={`relative shrink-0 overflow-hidden bg-appleGray-100 ${IMAGE_ASPECT}`}
+      className={`relative shrink-0 overflow-hidden bg-appleGray-100 sm:rounded-l-2xl ${IMAGE_ASPECT}`}
     >
       {image ? (
         <Image
           src={image}
           alt={imageAlt}
           fill
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 200px"
         />
       ) : (
         <div
@@ -103,16 +102,28 @@ function CardImage({ image, imageAlt }) {
         </div>
       )}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-sky-900/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 bg-sky-900/0 transition-colors duration-300 group-hover:bg-sky-900/15"
         aria-hidden
       />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+        aria-hidden
+      />
+      <div className="absolute inset-x-0 bottom-0 z-10 flex justify-end p-3 sm:p-4">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-all duration-300 group-hover:bg-sky-500 group-hover:shadow-lg sm:h-10 sm:w-10"
+          aria-hidden
+        >
+          <FaGraduationCap className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 sm:h-4 sm:w-4" />
+        </span>
+      </div>
     </div>
   );
 }
 
 function CategoryCard({ title, description, image, imageAlt }) {
   return (
-    <article className="group relative h-full overflow-hidden rounded-2xl border border-appleGray-200/80 bg-white shadow-soft card-apple-hover transition-colors duration-300 hover:border-sky-200">
+    <article className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-appleGray-200/80 bg-white shadow-soft card-apple-hover transition-colors duration-300 hover:border-sky-300">
       <div
         className="absolute inset-x-0 top-0 z-10 h-1 origin-left scale-x-0 bg-gradient-to-r from-sky-500 to-sky-600 transition-transform duration-300 group-hover:scale-x-100"
         aria-hidden
