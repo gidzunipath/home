@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "../../../lib/supabase";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 const DocumentsFromUs = ({ applicationId }) => {
+  const { showWarning, showError, showConfirm } = useAppModal();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -46,14 +48,14 @@ const DocumentsFromUs = ({ applicationId }) => {
   const handleFileUpload = async (file) => {
     // Validate file type
     if (file.type !== "application/pdf") {
-      alert("Only PDF files are allowed.");
+      showWarning("Only PDF files are allowed.");
       return null;
     }
 
     // Validate file size (<= 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      alert("File size should be 5MB or less.");
+      showWarning("File size should be 5MB or less.");
       return null;
     }
 
@@ -73,13 +75,13 @@ const DocumentsFromUs = ({ applicationId }) => {
 
     if (error) {
       console.error("Error uploading file:", error.message);
-      alert("Failed to upload file. Please try again.");
+      showError("Failed to upload file. Please try again.");
       return null;
     }
 
     if (!storageData.path) {
       console.error("File path is undefined after upload.");
-      alert("Upload failed due to an unknown error.");
+      showError("Upload failed due to an unknown error.");
       return null;
     }
     debugger;
@@ -95,17 +97,17 @@ const DocumentsFromUs = ({ applicationId }) => {
 
     // Basic validation
     if (!name) {
-      alert("Please provide a document name.");
+      showWarning("Please provide a document name.");
       return;
     }
 
     if (!upload_by) {
-      alert("Please select who is uploading the document.");
+      showWarning("Please select who is uploading the document.");
       return;
     }
 
     if (!type) {
-      alert("Please select a document type.");
+      showWarning("Please select a document type.");
       return;
     }
 
@@ -136,7 +138,7 @@ const DocumentsFromUs = ({ applicationId }) => {
 
     if (error) {
       console.error("Error adding document:", error.message);
-      alert("Failed to add document. Please try again.");
+      showError("Failed to add document. Please try again.");
     } else {
       // Update local state
       setDocuments([...documents, data[0]]);
@@ -154,10 +156,13 @@ const DocumentsFromUs = ({ applicationId }) => {
 
   // Handle Delete Document
   const handleDeleteDocument = async (docId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this document?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Document",
+      message: "Are you sure you want to delete this document?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     const { data: doc, error: fetchError } = await supabase
       .from("documents")
@@ -170,7 +175,7 @@ const DocumentsFromUs = ({ applicationId }) => {
         "Error fetching document for deletion:",
         fetchError.message
       );
-      alert("Failed to delete document. Please try again.");
+      showError("Failed to delete document. Please try again.");
       return;
     }
 
@@ -187,7 +192,7 @@ const DocumentsFromUs = ({ applicationId }) => {
             "Error deleting file from storage:",
             deleteError.message
           );
-          alert("Failed to delete file from storage.");
+          showError("Failed to delete file from storage.");
           return;
         }
       }
@@ -198,7 +203,7 @@ const DocumentsFromUs = ({ applicationId }) => {
 
     if (error) {
       console.error("Error deleting document:", error.message);
-      alert("Failed to delete document. Please try again.");
+      showError("Failed to delete document. Please try again.");
     } else {
       // Update local state
       setDocuments(documents.filter((doc) => doc.id !== docId));
@@ -211,12 +216,12 @@ const DocumentsFromUs = ({ applicationId }) => {
 
     // Basic validation
     if (!name) {
-      alert("Please provide a document name.");
+      showWarning("Please provide a document name.");
       return;
     }
 
     if (!type) {
-      alert("Please select a document type.");
+      showWarning("Please select a document type.");
       return;
     }
 
@@ -243,7 +248,7 @@ const DocumentsFromUs = ({ applicationId }) => {
 
     if (error) {
       console.error("Error updating document:", error.message);
-      alert("Failed to update document. Please try again.");
+      showError("Failed to update document. Please try again.");
     } else {
       // Update local state
       setDocuments(

@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import {
   FaGraduationCap,
@@ -16,6 +17,7 @@ import {
 } from "react-icons/fa";
 
 const StudentApplicationForm = () => {
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -305,6 +307,22 @@ const StudentApplicationForm = () => {
       FinancialDocuments: null,
     },
   });
+
+  useEffect(() => {
+    const ref =
+      searchParams.get("ref") ||
+      searchParams.get("referral") ||
+      searchParams.get("referral_code");
+    if (!ref) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      AdditionalInformation: {
+        ...prev.AdditionalInformation,
+        ReferenceCode: ref,
+      },
+    }));
+  }, [searchParams]);
 
   // Define form steps
   const steps = [

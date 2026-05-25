@@ -132,6 +132,7 @@ module.exports = {
         float: "float 3s ease-in-out infinite",
         "pulse-slow": "pulse 2s infinite",
         "gradient-move": "gradientMove 8s ease infinite",
+        "partner-scroll": "partnerScroll 40s linear infinite",
       },
       keyframes: {
         fadeInUp: {
@@ -165,6 +166,10 @@ module.exports = {
         gradientMove: {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
+        },
+        partnerScroll: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
       },
       backgroundSize: {

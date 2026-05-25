@@ -9,6 +9,7 @@ import {
   FaGraduationCap,
 } from "react-icons/fa";
 import Image from "next/image";
+import { STUDENTS_COUNT } from "@/lib/marketing-stats";
 
 // Default testimonials data
 const defaultTestimonialsData = [
@@ -268,9 +269,9 @@ export default function TestimonialsCarousel() {
         {/* Statistics */}
         <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: "1000+", label: "Students Placed" },
+            { value: STUDENTS_COUNT, label: "Students Placed" },
             { value: "50+", label: "Partner Universities" },
-            { value: "98%", label: "Visa Success Rate" },
+            { value: "99%", label: "Visa Success Rate" },
             { value: "5★", label: "Average Rating" },
           ].map((stat, index) => (
             <div key={index} className="group">

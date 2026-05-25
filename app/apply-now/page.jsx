@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { STUDENTS_COUNT } from "@/lib/marketing-stats";
 
 export default function VisaOptionsPage() {
   const router = useRouter();
@@ -51,10 +52,10 @@ export default function VisaOptionsPage() {
   ];
 
   const stats = [
-    { number: "2000+", label: "Students Placed", icon: FaGraduationCap },
+    { number: STUDENTS_COUNT, label: "Students Placed", icon: FaGraduationCap },
     { number: "50+", label: "Universities", icon: FaUniversity },
     { number: "15+", label: "Years Experience", icon: FaStar },
-    { number: "98%", label: "Success Rate", icon: FaRocket },
+    { number: "99%", label: "Success Rate", icon: FaRocket },
   ];
 
   return (

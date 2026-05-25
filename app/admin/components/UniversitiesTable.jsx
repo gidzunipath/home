@@ -3,11 +3,51 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "../../../lib/supabase";
+import {
+  UNIVERSITY_STATUSES,
+  normalizeUniversityStatus,
+  getUniversityStatusLabel,
+} from "../../../lib/university-status";
+import { useAppModal } from "../../../hooks/useAppModal";
 
-const BATCH_OPTIONS = ["Summer", "Winter"];
-const STATUS_OPTIONS = ["Yes", "No", "Progress"];
+function universityStatusIconName(status) {
+  const v = normalizeUniversityStatus(status);
+  switch (v) {
+    case "accepted":
+      return "mdi:check-circle";
+    case "rejected":
+      return "mdi:close-circle";
+    case "submitted":
+      return "mdi:file-send-outline";
+    case "verification":
+      return "mdi:shield-search";
+    case "started":
+      return "mdi:play-circle-outline";
+    default:
+      return "mdi:help-circle-outline";
+  }
+}
+
+function universityStatusBadgeClass(status) {
+  const v = normalizeUniversityStatus(status);
+  switch (v) {
+    case "accepted":
+      return "bg-green-100 text-green-800";
+    case "rejected":
+      return "bg-red-100 text-red-800";
+    case "submitted":
+      return "bg-amber-100 text-amber-800";
+    case "verification":
+      return "bg-indigo-100 text-indigo-800";
+    case "started":
+      return "bg-slate-100 text-slate-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
 
 const UniversitiesTable = ({ applicationId }) => {
+  const { showWarning, showError, showConfirm } = useAppModal();
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -51,7 +91,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     // Basic validation
     if (!uni_name || !course || !place || !language || !deadline || !status) {
-      alert("Please fill in all fields.");
+      showWarning("Please fill in all fields.");
       return;
     }
 
@@ -98,10 +138,13 @@ const UniversitiesTable = ({ applicationId }) => {
 
   // Handle Delete University
   const handleDeleteUniversity = async (uniId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this university?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete University",
+      message: "Are you sure you want to delete this university?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     const { error } = await supabase
       .from("universities")
@@ -110,7 +153,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     if (error) {
       console.error("Error deleting university:", error.message);
-      alert("Failed to delete university. Please try again.");
+      showError("Failed to delete university. Please try again.");
     } else {
       // Update local state
       setUniversities(universities.filter((uni) => uni.id !== uniId));
@@ -123,7 +166,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     // Basic validation
     if (!uni_name || !course || !place || !language || !deadline || !status) {
-      alert("Please fill in all fields.");
+      showWarning("Please fill in all fields.");
       return;
     }
 
@@ -141,7 +184,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     if (error) {
       console.error("Error updating university:", error.message);
-      alert("Failed to update university. Please try again.");
+      showError("Failed to update university. Please try again.");
     } else {
       // Update local state
       setUniversities(
@@ -270,29 +313,15 @@ const UniversitiesTable = ({ applicationId }) => {
                     </td>
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                          uni.status === "yes"
-                            ? "bg-green-100 text-green-800"
-                            : uni.status === "progress"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${universityStatusBadgeClass(
+                          uni.status
+                        )}`}
                       >
                         <Icon
-                          icon={
-                            uni.status === "yes"
-                              ? "mdi:check-circle"
-                              : uni.status === "progress"
-                              ? "mdi:clock-outline"
-                              : "mdi:close-circle"
-                          }
+                          icon={universityStatusIconName(uni.status)}
                           className="text-sm"
                         />
-                        {uni.status === "yes"
-                          ? "Accepted"
-                          : uni.status === "progress"
-                          ? "In Progress"
-                          : "Rejected"}
+                        {getUniversityStatusLabel(uni.status)}
                       </span>
                     </td>
                     <td className="py-4 px-6">
@@ -300,7 +329,10 @@ const UniversitiesTable = ({ applicationId }) => {
                         <button
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                           onClick={() => {
-                            setCurrentUni({ ...uni });
+                            setCurrentUni({
+                              ...uni,
+                              status: normalizeUniversityStatus(uni.status),
+                            });
                             setShowEditModal(true);
                           }}
                           title="Edit university"
@@ -423,9 +455,11 @@ const UniversitiesTable = ({ applicationId }) => {
                     className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200"
                   >
                     <option value="">Select status</option>
-                    <option value="progress">In Progress</option>
-                    <option value="yes">Accepted</option>
-                    <option value="no">Rejected</option>
+                    {UNIVERSITY_STATUSES.map(({ value, label }) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -549,9 +583,11 @@ const UniversitiesTable = ({ applicationId }) => {
                     className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200"
                   >
                     <option value="">Select status</option>
-                    <option value="progress">In Progress</option>
-                    <option value="yes">Accepted</option>
-                    <option value="no">Rejected</option>
+                    {UNIVERSITY_STATUSES.map(({ value, label }) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

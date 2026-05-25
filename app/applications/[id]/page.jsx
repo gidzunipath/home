@@ -112,7 +112,7 @@ export default function ApplicationDetails() {
       case "Step2":
         return "University";
       case "Step3":
-        return "Visa";
+        return "Blocked Account";
       case "Step4":
         return "Successful";
       default:

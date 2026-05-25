@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "../../../lib/supabase";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 const DocumentsTable = ({ applicationId }) => {
+  const { showWarning, showError, showConfirm } = useAppModal();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -46,12 +48,12 @@ const DocumentsTable = ({ applicationId }) => {
 
     // Basic validation
     if (!name) {
-      alert("Please provide a document name.");
+      showWarning("Please provide a document name.");
       return;
     }
 
     if (!type) {
-      alert("Please select a document type.");
+      showWarning("Please select a document type.");
       return;
     }
 
@@ -86,16 +88,19 @@ const DocumentsTable = ({ applicationId }) => {
 
   // Handle Delete Document
   const handleDeleteDocument = async (docId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this document?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Document",
+      message: "Are you sure you want to delete this document?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     const { error } = await supabase.from("documents").delete().eq("id", docId);
 
     if (error) {
       console.error("Error deleting document:", error.message);
-      alert("Failed to delete document. Please try again.");
+      showError("Failed to delete document. Please try again.");
     } else {
       // Update local state
       setDocuments(documents.filter((doc) => doc.id !== docId));
@@ -108,12 +113,12 @@ const DocumentsTable = ({ applicationId }) => {
 
     // Basic validation
     if (!name) {
-      alert("Please provide a document name.");
+      showWarning("Please provide a document name.");
       return;
     }
 
     if (!type) {
-      alert("Please select a document type.");
+      showWarning("Please select a document type.");
       return;
     }
 
@@ -128,7 +133,7 @@ const DocumentsTable = ({ applicationId }) => {
 
     if (error) {
       console.error("Error updating document:", error.message);
-      alert("Failed to update document. Please try again.");
+      showError("Failed to update document. Please try again.");
     } else {
       // Update local state
       setDocuments(documents.map((doc) => (doc.id === id ? currentDoc : doc)));

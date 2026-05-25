@@ -1,13 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import { useAppModal } from "../../../hooks/useAppModal";
+
+function getYoutubeVideoId(url) {
+  if (!url || typeof url !== "string") return null;
+  const u = url.trim();
+  const short = u.match(/youtu\.be\/([^?&#/]+)/);
+  if (short) return short[1];
+  const watch = u.match(/[?&]v=([^?&#]+)/);
+  if (watch) return watch[1];
+  const embed = u.match(/youtube\.com\/embed\/([^?&#/]+)/);
+  if (embed) return embed[1];
+  const shorts = u.match(/youtube\.com\/shorts\/([^?&#/]+)/);
+  if (shorts) return shorts[1];
+  return null;
+}
 
 const GidzBuddyChecklistAdmin = () => {
+  const { showWarning, showError, showConfirm } = useAppModal();
   const [checklistItems, setChecklistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
+  const [viewItem, setViewItem] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -41,7 +58,7 @@ const GidzBuddyChecklistAdmin = () => {
 
     // Basic validation
     if (!title || !description) {
-      alert("Please fill in all required fields.");
+      showWarning("Please fill in all required fields.");
       return;
     }
 
@@ -75,18 +92,18 @@ const GidzBuddyChecklistAdmin = () => {
           resetForm();
           setShowAddModal(false);
         } else {
-          alert("Error: " + result.error);
+          showError(result.error);
         }
       } else {
         const textResponse = await response.text();
         console.error("Non-JSON response:", textResponse);
-        alert(
+        showError(
           "Server returned an unexpected response. Check console for details."
         );
       }
     } catch (error) {
       console.error("Error creating checklist item:", error);
-      alert("Error creating checklist item: " + error.message);
+      showError("Error creating checklist item: " + error.message);
     }
   };
 
@@ -96,7 +113,7 @@ const GidzBuddyChecklistAdmin = () => {
 
     // Basic validation
     if (!title || !description) {
-      alert("Please fill in all required fields.");
+      showWarning("Please fill in all required fields.");
       return;
     }
 
@@ -131,26 +148,29 @@ const GidzBuddyChecklistAdmin = () => {
           setShowEditModal(false);
           setCurrentItem(null);
         } else {
-          alert("Error: " + result.error);
+          showError(result.error);
         }
       } else {
         const textResponse = await response.text();
         console.error("Non-JSON response:", textResponse);
-        alert(
+        showError(
           "Server returned an unexpected response. Check console for details."
         );
       }
     } catch (error) {
       console.error("Error updating checklist item:", error);
-      alert("Error updating checklist item: " + error.message);
+      showError("Error updating checklist item: " + error.message);
     }
   };
 
   const handleDeleteItem = async (itemId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this checklist item?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Checklist Item",
+      message: "Are you sure you want to delete this checklist item?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/gidz-buddy-checklist/${itemId}`, {
@@ -161,12 +181,13 @@ const GidzBuddyChecklistAdmin = () => {
 
       if (result.success) {
         setChecklistItems(checklistItems.filter((item) => item.id !== itemId));
+        setViewItem((v) => (v && v.id === itemId ? null : v));
       } else {
-        alert("Error: " + result.error);
+        showError(result.error);
       }
     } catch (error) {
       console.error("Error deleting checklist item:", error);
-      alert("Error deleting checklist item");
+      showError("Error deleting checklist item");
     }
   };
 
@@ -463,6 +484,120 @@ const GidzBuddyChecklistAdmin = () => {
         </div>
       )}
 
+      {viewItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="checklist-view-title"
+          onClick={() => setViewItem(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-appleGray-200 w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-6 py-4 text-white shrink-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white/70 uppercase tracking-wide">
+                    Checklist item
+                  </p>
+                  <h2
+                    id="checklist-view-title"
+                    className="text-lg font-semibold leading-snug mt-1 break-words"
+                  >
+                    {viewItem.title}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setViewItem(null)}
+                  className="shrink-0 p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+                  aria-label="Close"
+                >
+                  <Icon icon="mdi:close" className="text-xl" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-5">
+              <div>
+                <h3 className="text-xs font-semibold text-appleGray-500 uppercase tracking-wider mb-2">
+                  Description
+                </h3>
+                <p className="text-sm text-appleGray-800 leading-relaxed whitespace-pre-wrap">
+                  {viewItem.description}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold text-appleGray-500 uppercase tracking-wider mb-2">
+                  Video guide
+                </h3>
+                {(() => {
+                  const videoId = getYoutubeVideoId(viewItem.youtube_link);
+                  if (videoId && viewItem.youtube_link) {
+                    return (
+                      <a
+                        href={viewItem.youtube_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative block overflow-hidden rounded-xl border border-appleGray-200 shadow-md bg-black aspect-video"
+                      >
+                        <img
+                          src={`https://i.ytimg.com/vi/${videoId}/hq720.jpg`}
+                          alt=""
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+                          }}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/35 group-hover:bg-black/45 transition-colors">
+                          <Icon
+                            icon="mdi:play-circle"
+                            className="text-white text-6xl drop-shadow-lg opacity-95 group-hover:scale-105 transition-transform"
+                          />
+                        </div>
+                        <span className="sr-only">Open video on YouTube</span>
+                      </a>
+                    );
+                  }
+                  if (viewItem.youtube_link) {
+                    return (
+                      <a
+                        href={viewItem.youtube_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm bg-red-50 px-4 py-2 rounded-xl border border-red-100"
+                      >
+                        <Icon icon="mdi:youtube" className="text-xl" />
+                        Open video link
+                      </a>
+                    );
+                  }
+                  return (
+                    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-appleGray-200 bg-appleGray-50 py-10 text-appleGray-500 text-sm">
+                      <Icon icon="mdi:video-off" className="text-3xl" />
+                      No video linked for this item
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-appleGray-100 bg-appleGray-50/80 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewItem(null)}
+                className="w-full py-3 rounded-xl bg-appleGray-200 text-appleGray-800 font-semibold text-sm hover:bg-appleGray-300 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Checklist Items Table */}
       {checklistItems.length === 0 ? (
         <div className="bg-appleGray-50/60 backdrop-blur-sm rounded-2xl p-8 border border-appleGray-200 text-center">
@@ -509,22 +644,33 @@ const GidzBuddyChecklistAdmin = () => {
                 {checklistItems.map((item) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-appleGray-50/70 transition-colors duration-200"
+                    tabIndex={0}
+                    className="hover:bg-appleGray-50/70 transition-colors duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+                    onClick={() => setViewItem(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setViewItem(item);
+                      }
+                    }}
                   >
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-soft">
+                    <td className="py-4 px-6 max-w-[16rem] overflow-hidden">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className="h-5 w-5 shrink-0  bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-soft"
+                          aria-hidden
+                        >
                           <Icon
                             icon="mdi:check-bold"
-                            className="text-white text-lg"
+                            className="text-white text-lg shrink-0"
                           />
                         </div>
-                        <div>
-                          <div className="font-semibold text-appleGray-900">
+                        <div className="min-w-0 flex-1">
+                          <div
+                            className="font-sm text-appleGray-900 truncate"
+                            title={item.title}
+                          >
                             {item.title}
-                          </div>
-                          <div className="text-xs text-appleGray-500 mt-1">
-                            ID: {item.id}
                           </div>
                         </div>
                       </div>
@@ -542,6 +688,7 @@ const GidzBuddyChecklistAdmin = () => {
                           href={item.youtube_link}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm hover:underline transition-colors duration-200 bg-red-50 px-3 py-1.5 rounded-full"
                         >
                           <Icon icon="mdi:youtube" className="text-base" />
@@ -583,8 +730,12 @@ const GidzBuddyChecklistAdmin = () => {
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
+                      <div
+                        className="flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
+                          type="button"
                           onClick={() => {
                             setCurrentItem(item);
                             setShowEditModal(true);
@@ -595,6 +746,7 @@ const GidzBuddyChecklistAdmin = () => {
                           <Icon icon="mdi:pencil" className="text-lg" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteItem(item.id)}
                           className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-200 border border-red-200 hover:border-red-300"
                           title="Delete checklist item"

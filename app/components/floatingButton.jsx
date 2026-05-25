@@ -23,11 +23,11 @@ export default function FloatingButtons() {
   };
 
   const handleWhatsAppClick = () => {
-    window.open("https://wa.me/4915566389194", "_blank");
+    window.open("https://wa.me/94741166235", "_blank");
   };
 
   const handlePhoneClick = () => {
-    window.location.href = "tel:+94112345678";
+    window.location.href = "tel:+94741166235";
   };
 
   const handleEmailClick = () => {

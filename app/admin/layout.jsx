@@ -1,16 +1,27 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
-import Nav from "../components/nav-german";
+import AdminSideNav from "./components/AdminSideNav";
+import AdminTopNav from "./components/AdminTopNav";
+
+const MESSAGES_FULLSCREEN =
+  /^\/admin\/messages(\/|$)/;
+
+const GERMAN_LIFE_EDITOR =
+  /^\/admin\/german-life\/(new|[^/]+\/edit)(\/|$)/;
 
 export default function AdminLayout({ children }) {
+  const pathname = usePathname() ?? "";
+  const fullscreenMessages = MESSAGES_FULLSCREEN.test(pathname);
+  const germanLifeEditor = GERMAN_LIFE_EDITOR.test(pathname);
   const { loading, isAuthenticated } = useAdminAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-appleGray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-appleGray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-sky-200 border-t-sky-500 mx-auto"></div>
+          <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-sky-200 border-t-sky-500" />
           <div className="mt-6 space-y-2">
             <h3 className="text-xl font-semibold text-appleGray-800">
               Loading Admin Panel
@@ -22,28 +33,39 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  // If not authenticated, the useAdminAuth hook will redirect to login
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-appleGray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-pulse">
-            <div className="text-xl font-semibold text-appleGray-800">
-              Redirecting to login...
-            </div>
-          </div>
+      <div className="flex min-h-screen items-center justify-center bg-appleGray-50">
+        <div className="animate-pulse text-xl font-semibold text-appleGray-800">
+          Redirecting to login...
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-appleGray-50">
-      {/* Use the existing navigation */}
-      <Nav />
+  if (fullscreenMessages) {
+    return (
+      <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-appleGray-50">
+        {children}
+      </div>
+    );
+  }
 
-      {/* Page Content */}
-      <main className="min-h-screen pt-4">{children}</main>
+  return (
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-appleGray-100">
+      <AdminSideNav />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <AdminTopNav />
+        <main
+          className={
+            germanLifeEditor
+              ? "min-h-0 flex-1 overflow-hidden"
+              : "min-h-0 flex-1 overflow-y-auto admin-main-scroll"
+          }
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "../../../lib/supabase";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 const ProfilePic = ({ applicationId }) => {
+  const { showWarning, showError, showInfo, showConfirm } = useAppModal();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -44,7 +46,7 @@ const ProfilePic = ({ applicationId }) => {
 
     // Basic validation
     if (!name) {
-      alert("Please provide a document name.");
+      showWarning("Please provide a document name.");
       return;
     }
 
@@ -77,16 +79,19 @@ const ProfilePic = ({ applicationId }) => {
 
   // Handle Delete Document
   const handleDeleteDocument = async (docId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this document?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Document",
+      message: "Are you sure you want to delete this document?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     const { error } = await supabase.from("documents").delete().eq("id", docId);
 
     if (error) {
       console.error("Error deleting document:", error.message);
-      alert("Failed to delete document. Please try again.");
+      showError("Failed to delete document. Please try again.");
     } else {
       // Update local state
       setDocuments(documents.filter((doc) => doc.id !== docId));
@@ -99,7 +104,7 @@ const ProfilePic = ({ applicationId }) => {
 
     // Basic validation
     if (!name) {
-      alert("Please provide a document name.");
+      showWarning("Please provide a document name.");
       return;
     }
 
@@ -113,7 +118,7 @@ const ProfilePic = ({ applicationId }) => {
 
     if (error) {
       console.error("Error updating document:", error.message);
-      alert("Failed to update document. Please try again.");
+      showError("Failed to update document. Please try again.");
     } else {
       // Update local state
       setDocuments(documents.map((doc) => (doc.id === id ? currentDoc : doc)));
@@ -154,7 +159,7 @@ const ProfilePic = ({ applicationId }) => {
                   ) : (
                     <button
                       className="bg-yellow-500 text-white px-3 py-1 rounded"
-                      onClick={() => alert("Document not yet uploaded.")}
+                      onClick={() => showInfo("Document not yet uploaded.")}
                       disabled
                     >
                       Not Yet Uploaded

@@ -18,6 +18,7 @@ import {
   FaComments,
 } from "react-icons/fa";
 import axios from "axios";
+import { OFFICE_BRANCHES } from "@/lib/officeBranches";
 
 // Success Dialog Component
 const SuccessDialog = ({ onClose }) => {
@@ -69,6 +70,7 @@ export default function ContactPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [mapsLoaded, setMapsLoaded] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -134,50 +136,21 @@ export default function ContactPage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-appleGray-50 via-white to-appleGray-100 pt-24 pb-16">
         <div className="absolute inset-0 bg-gradient-to-r from-sky-500/5 via-transparent to-sky-600/5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <div className="space-y-8 animate-fade-in-up">
+          <div className="mt-8 animate-fade-in-up">
             <div className="w-20 h-20 bg-gradient-to-br from-sky-500 to-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-soft">
               <FaComments className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-4xl lg:text-6xl font-bold text-appleGray-900">
-              Get In
-              <span className="block text-gradient bg-gradient-to-r from-sky-500 to-sky-600 bg-clip-text text-transparent">
+              Get In 
+              <span className=" pl-2 text-gradient bg-gradient-to-r from-sky-500 to-sky-600 bg-clip-text text-transparent">
                 Touch
               </span>
             </h1>{" "}
-            <p className="text-xl text-appleGray-600 max-w-2xl mx-auto">
-              Ready to start your journey abroad? We&apos;re here to help you
-              every step of the way.
-            </p>
-            {/* Quick Contact Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto pt-8">
-              {" "}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FaUsers className="w-8 h-8 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-appleGray-900">500+</h3>
-                <p className="text-appleGray-600">Happy Clients</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FaHandshake className="w-8 h-8 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-appleGray-900">24/7</h3>
-                <p className="text-appleGray-600">Support Available</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FaGlobe className="w-8 h-8 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-appleGray-900">15+</h3>
-                <p className="text-appleGray-600">Countries Served</p>
-              </div>
-            </div>
+
+
           </div>
         </div>
-      </section>{" "}
-      {/* Contact Cards Section */}
-      <section className="py-16 relative">
+      
         {/* Additional floating elements */}
         <div
           className="absolute top-20 left-16 w-24 h-24 bg-sky-400/8 rounded-2xl animate-float"
@@ -190,17 +163,12 @@ export default function ContactPage() {
         <div
           className="absolute top-40 right-1/4 w-16 h-16 bg-sky-600/12 rounded-full animate-float"
           style={{ animationDelay: "2.5s" }}
-        ></div>
+        >
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 animate-fade-in-up">
-            <h2 className="text-3xl lg:text-4xl font-bold text-appleGray-900 mb-4">
-              Ways to Reach Us
-            </h2>
-            <p className="text-xl text-appleGray-600 max-w-2xl mx-auto">
-              Choose the most convenient way to connect with our team
-            </p>
-          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4" >
+
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Call Us Card */}
@@ -216,10 +184,10 @@ export default function ContactPage() {
               </p>
               <div className="space-y-2">
                 <a
-                  href="tel:+4915566389194"
+                  href="tel:+94741166235"
                   className="block text-lg font-semibold text-sky-600 hover:text-sky-700 transition-colors"
                 >
-                  +49 155 6638 9194
+                  +94 74 116 6235
                 </a>
                 <div className="flex items-center justify-center space-x-2 text-appleGray-500">
                   <FaClock className="w-4 h-4" />
@@ -239,17 +207,27 @@ export default function ContactPage() {
               <p className="text-appleGray-600 mb-4">
                 Monday to Friday, 9:30 AM to 5:00 PM
               </p>
-              <div className="space-y-2">
-                <p className="text-lg font-semibold text-appleGray-800">
-                  Ponnalai Road,
-                </p>
-                <p className="text-appleGray-600">
-                  Sandilipay, 40000, Sri Lanka
-                </p>
-                <div className="flex items-center justify-center space-x-2 text-appleGray-500">
-                  <FaMapMarkerAlt className="w-4 h-4" />
-                  <span className="text-sm">By appointment</span>
-                </div>
+              <div className="space-y-4">
+                {OFFICE_BRANCHES.map((branch) => (
+                  <div key={branch.id}>
+                    <p className="text-sm font-semibold text-sky-600 mb-1">
+                      {branch.name}
+                    </p>
+                    {branch.addressLines.map((line) => (
+                      <p
+                        key={line}
+                        className={
+                          branch.addressLines.indexOf(line) === 0
+                            ? "text-lg font-semibold text-appleGray-800"
+                            : "text-appleGray-600"
+                        }
+                      >
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                ))}
+                
               </div>
             </div>
 
@@ -414,27 +392,55 @@ export default function ContactPage() {
                 </form>
               </div>
             </div>{" "}
-            {/* Map */}
-            <div className="bg-white rounded-3xl p-8 shadow-large animate-fade-in-up">
-              <div className="text-center mb-6">
+            {/* Maps */}
+            <div className="bg-white rounded-3xl p-8 shadow-large animate-fade-in-up space-y-8">
+              <div className="text-center">
                 <h3 className="text-2xl font-bold text-appleGray-900 mb-2">
                   Find Us Here
                 </h3>
                 <p className="text-appleGray-600">
-                  Visit our office for in-person consultation
+                  Visit our offices for in-person consultation
                 </p>
               </div>
 
-              <div className="relative w-full h-80 rounded-2xl overflow-hidden">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d695.1390159393035!2d79.98636189318711!3d9.740627382669304!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3afe5347809f2c81%3A0xc026f77fc091b132!2sThe%20gifery%20shop!5e0!3m2!1sen!2slk!4v1738508392870!5m2!1sen!2slk"
-                  className="w-full h-full"
-                  style={{ border: "0" }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-              </div>
+              {OFFICE_BRANCHES.map((branch) => (
+                <div key={branch.id}>
+                  <h4 className="text-lg font-semibold text-appleGray-900 mb-3 text-center">
+                    {branch.name}
+                  </h4>
+                  <div className="relative w-full aspect-[4/3] min-h-[240px] sm:min-h-[300px] rounded-2xl overflow-hidden border border-appleGray-100">
+                    {!mapsLoaded[branch.id] && (
+                      <div
+                        className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-appleGray-50"
+                        aria-live="polite"
+                        aria-busy="true"
+                      >
+                        <div className="w-10 h-10 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mb-3" />
+                        <p className="text-sm font-medium text-appleGray-600">
+                          Loading map...
+                        </p>
+                      </div>
+                    )}
+                    <iframe
+                      src={branch.mapEmbedUrl}
+                      title={branch.mapTitle}
+                      className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${
+                        mapsLoaded[branch.id] ? "opacity-100" : "opacity-0"
+                      }`}
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      onLoad={() =>
+                        setMapsLoaded((prev) => ({
+                          ...prev,
+                          [branch.id]: true,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -510,7 +516,7 @@ export default function ContactPage() {
 
             {/* WhatsApp */}
             <a
-              href="https://wa.me/4915566389194"
+              href="https://wa.me/94741166235"
               target="_blank"
               rel="noopener noreferrer"
               className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-all duration-300 shadow-soft"
@@ -537,7 +543,7 @@ export default function ContactPage() {
                 <FaPaperPlane className="w-4 h-4" />
               </a>
               <a
-                href="tel:+4915566389194"
+                href="tel:+94741166235"
                 className="inline-flex items-center justify-center space-x-2 bg-sky-600 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-sky-700 transition-all duration-300 btn-apple-hover shadow-soft"
               >
                 <FaPhoneAlt className="w-4 h-4" />

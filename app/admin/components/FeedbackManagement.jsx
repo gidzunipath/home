@@ -10,8 +10,10 @@ import {
   FaTrash,
   FaFilter,
 } from "react-icons/fa";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 const FeedbackManagement = () => {
+  const { showError, showConfirm } = useAppModal();
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -81,22 +83,25 @@ const FeedbackManagement = () => {
         await fetchFeedbacks(); // Refresh the list
         setShowViewModal(false);
       } else {
-        alert("Error updating feedback: " + result.error);
+        showError("Error updating feedback: " + result.error);
       }
     } catch (error) {
       console.error("Error updating feedback:", error);
-      alert("Error updating feedback: " + error.message);
+      showError("Error updating feedback: " + error.message);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDelete = async (feedbackId) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this feedback? This action cannot be undone."
-      )
-    ) {
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Feedback",
+      message:
+        "Are you sure you want to delete this feedback? This action cannot be undone.",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -111,11 +116,11 @@ const FeedbackManagement = () => {
       if (result.success) {
         await fetchFeedbacks(); // Refresh the list
       } else {
-        alert("Error deleting feedback: " + result.error);
+        showError("Error deleting feedback: " + result.error);
       }
     } catch (error) {
       console.error("Error deleting feedback:", error);
-      alert("Error deleting feedback: " + error.message);
+      showError("Error deleting feedback: " + error.message);
     } finally {
       setActionLoading(null);
     }
@@ -172,7 +177,7 @@ const FeedbackManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-appleGray-50 via-white to-sky-50 pt-24 p-6">
+    <div className="bg-gradient-to-br from-appleGray-50 via-white to-sky-50 p-6 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

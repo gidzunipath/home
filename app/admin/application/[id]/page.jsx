@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { supabase } from "../../../../lib/supabase";
 import UniversitiesTable from "../../components/UniversitiesTable";
@@ -8,6 +9,7 @@ import DocumentsTable from "../../components/DocumentsTable";
 import DcoumentsFromUs from "../../components/DocumentsFromUs";
 import ApplicationOptions from "../../components/ApplicationOptoins";
 import ProfilePic from "../../components/ProfilePic";
+import SpecialNotesEditor from "../../components/SpecialNotesEditor";
 import axios from "axios";
 import Image from "next/image";
 
@@ -173,8 +175,27 @@ const EditableField = ({
 // ----------------------
 // Applicant Detail Component
 // ----------------------
+const TABS = [
+  { id: "overview", label: "Overview", icon: "mdi:account" },
+  { id: "payments", label: "Payments", icon: "mdi:credit-card" },
+  { id: "documents", label: "Documents", icon: "mdi:file-document-multiple" },
+  { id: "universities", label: "Universities", icon: "mdi:university" },
+  { id: "uni-progress", label: "Uni Progress", icon: "mdi:school" },
+  { id: "visa-progress", label: "Visa Progress", icon: "mdi:passport" },
+  { id: "visa-tracker", label: "Visa Tracker", icon: "mdi:map-marker-check" },
+  { id: "notes", label: "Notes", icon: "mdi:note-text" },
+];
+
+const VALID_TAB_IDS = new Set(TABS.map((t) => t.id));
+const DEFAULT_TAB = "overview";
+
 const ApplicantDetail = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [applicant, setApplicant] = useState(null);
+  const [activeTab, setActiveTab] = useState(DEFAULT_TAB);
 
   // For toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -199,6 +220,25 @@ const ApplicantDetail = () => {
     message: "",
     onConfirm: null,
   });
+
+  // Sync tab from URL (?tab=...)
+  const tabFromUrl = searchParams.get("tab");
+  useEffect(() => {
+    if (tabFromUrl && VALID_TAB_IDS.has(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    } else {
+      setActiveTab(DEFAULT_TAB);
+    }
+  }, [tabFromUrl]);
+
+  const navigateToTab = useCallback(
+    (tabId) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", tabId);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   // --------------------------------
   //  Grab the applicant ID (from URL)
@@ -404,7 +444,7 @@ const ApplicantDetail = () => {
                                                 <span style="color: white; font-size: 14px;">📞</span>
                                             </div>
                                             <div>
-                                                <p style="margin: 0; color: #1f2937; font-weight: 600;">+49 155 66389194</p>
+                                                <p style="margin: 0; color: #1f2937; font-weight: 600;">+94 74 116 6235</p>
                                                 <p style="margin: 2px 0 0 0; color: #6b7280; font-size: 13px;">Monday to Friday, 9:30 AM - 5:00 PM</p>
                                             </div>
                                         </div>
@@ -476,6 +516,37 @@ const ApplicantDetail = () => {
         }
       },
     });
+  };
+
+  // -------------------------------------------
+  //  Save special notes (CRUD — no confirm dialog)
+  // -------------------------------------------
+  const handleSpecialNotesSave = async (value) => {
+    try {
+      const { error } = await supabase
+        .from("applications")
+        .update({ special_notes: value })
+        .eq("id", applicant.id);
+
+      if (error) throw error;
+
+      await fetchApplicant(applicant.id);
+      setNotification({
+        isOpen: true,
+        title: "Success",
+        message: "Notes saved successfully.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      setNotification({
+        isOpen: true,
+        title: "Error",
+        message: "Error saving notes.",
+        type: "error",
+      });
+      throw error;
+    }
   };
 
   // -------------------------------------------
@@ -652,7 +723,7 @@ const ApplicantDetail = () => {
   if (!applicant) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
-        <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="p-6 pb-12 sm:p-8">
           <div className="max-w-6xl mx-auto">
             <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-8 text-center">
               <div className="animate-pulse">
@@ -674,7 +745,7 @@ const ApplicantDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
       {/* Top spacing for navbar */}
-      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="p-6 pb-12 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 lg:p-8">
@@ -736,7 +807,28 @@ const ApplicantDetail = () => {
             </div>
           </div>
 
+          {/* Tab Navigation */}
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-2">
+            <div className="flex flex-wrap gap-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => navigateToTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  <Icon icon={tab.icon} className="text-base" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Personal Information Section */}
+          {activeTab === "overview" && (
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 lg:p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -856,7 +948,10 @@ const ApplicantDetail = () => {
             </div>
           </div>
 
+          )}
+
           {/* Payments Section */}
+          {activeTab === "payments" && (
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
@@ -949,7 +1044,10 @@ const ApplicantDetail = () => {
             </div>
           </div>
 
+          )}
+
           {/* Documents Section */}
+          {activeTab === "documents" && (
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
@@ -968,7 +1066,10 @@ const ApplicantDetail = () => {
             </div>
           </div>
 
+          )}
+
           {/* Universities Section */}
+          {activeTab === "universities" && (
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center">
@@ -978,173 +1079,155 @@ const ApplicantDetail = () => {
             </div>
             <UniversitiesTable applicationId={id} />
           </div>
+          )}
 
-          {/* Application Progress & Visa Section */}
-          <div className="space-y-8">
-            {/* Application Progress Card */}
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                  <Icon icon="mdi:check" className="text-xl text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Application Progress
-                </h2>
+          {/* Uni Progress Section */}
+          {activeTab === "uni-progress" && (
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
+                <Icon icon="mdi:school" className="text-xl text-white" />
               </div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
-                  <Icon icon="mdi:university" className="text-xl text-white" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  University Section
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white/60 backdrop-blur-sm space-y-4 rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                  <ApplicationOptions
-                    applicationId={id}
-                    optionsToCheck={[
-                      { name: "Create Gmail", option: false },
-                      { name: "Passport", option: false },
-                      { name: "IELTS", option: false },
-                      { name: "OL", option: false },
-                      { name: "AL", option: false },
-                      { name: "CV", option: false },
-                      { name: "School L. C", option: false },
-                      { name: "Birth C", option: false },
-                    ]}
-                    title="Application Setup"
-                  />
-                  <ApplicationOptions
-                    applicationId={id}
-                    optionsToCheck={[
-                      { name: "Bachelor D&T", option: false },
-                      { name: "Recommendation", option: false },
-                      { name: "Work", option: false },
-                      { name: "MOI", option: false },
-                    ]}
-                    title="Master"
-                  />
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                  <ApplicationOptions
-                    applicationId={id}
-                    optionsToCheck={[
-                      { name: "Create UA ACCOUNT", option: false },
-                      { name: "UNI 1 APPLY", option: false },
-                      { name: "UNI 2 APPLY", option: false },
-                      { name: "UNI 3 APPLY", option: false },
-                    ]}
-                    title="Admin"
-                  />
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                  <ApplicationOptions
-                    applicationId={id}
-                    optionsToCheck={[
-                      { name: "Admission Latter 1", option: false },
-                      { name: "Admission Latter 2", option: false },
-                      { name: "Admission Latter 3", option: false },
-                      { name: "Enrolled", option: false },
-                    ]}
-                    title="Admission"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-3 my-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <Icon icon="mdi:passport" className="text-xl text-white" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  Visa Section
-                </h2>
-              </div>
-
-              {/* Main Visa Documents */}
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                    <ApplicationOptions
-                      applicationId={id}
-                      optionsToCheck={[
-                        { name: "Create Gmail", option: false },
-                        { name: "Motivation Letter", option: false },
-                        {
-                          name: "CV",
-                          option: false,
-                        },
-                        { name: "Passport", option: false },
-                        { name: "Biometric Photo", option: false },
-                        { name: "Blocked Account", option: false },
-                        { name: "Health Insurance ", option: false },
-                      ]}
-                      title="Essential Documents"
-                    />
-                  </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                    <ApplicationOptions
-                      applicationId={id}
-                      optionsToCheck={[
-                        { name: "Create GP Account", option: false },
-                        {
-                          name: "Application Form",
-                          option: false,
-                        },
-                        { name: "Documents Uploaded", option: false },
-                        { name: "Submitted", option: false },
-                        { name: "Appointment Date", option: false },
-                        { name: "Interview", option: false },
-                        { name: "Dorms", option: false },
-                      ]}
-                      title="Admin"
-                    />
-                  </div>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                    <ApplicationOptions
-                      applicationId={id}
-                      optionsToCheck={[
-                        { name: "Travel Insurance", option: false },
-                        { name: "Flight Ticket (Dummy)", option: false },
-                      ]}
-                      title="Admission"
-                    />
-                  </div>
-                </div>
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900">University Progress</h2>
             </div>
-
-            {/* Visa Application Card */}
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Icon icon="mdi:passport" className="text-xl text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Visa Tracker
-                </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/60 backdrop-blur-sm space-y-4 rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Create Gmail", option: false },
+                    { name: "Passport", option: false },
+                    { name: "IELTS", option: false },
+                    { name: "OL", option: false },
+                    { name: "AL", option: false },
+                    { name: "CV", option: false },
+                    { name: "School L. C", option: false },
+                    { name: "Birth C", option: false },
+                  ]}
+                  title="Application Setup"
+                />
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Bachelor D&T", option: false },
+                    { name: "Recommendation", option: false },
+                    { name: "Work", option: false },
+                    { name: "MOI", option: false },
+                  ]}
+                  title="Master"
+                />
               </div>
-              {/* Additional Requirements */}
-              <div className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                    <ApplicationOptions
-                      applicationId={id}
-                      optionsToCheck={[
-                        { name: "Application Document", option: false },
-                        { name: "Submit Documents", option: false },
-                        { name: "Client Review", option: false },
-                        { name: "Interview Preparation", option: false },
-                        { name: "Appointment Date", option: false },
-                      ]}
-                      title="Application Tracker"
-                    />
-                  </div>
-                </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Create UA ACCOUNT", option: false },
+                    { name: "UNI 1 APPLY", option: false },
+                    { name: "UNI 2 APPLY", option: false },
+                    { name: "UNI 3 APPLY", option: false },
+                  ]}
+                  title="Admin"
+                />
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Admission Latter 1", option: false },
+                    { name: "Admission Latter 2", option: false },
+                    { name: "Admission Latter 3", option: false },
+                    { name: "Enrolled", option: false },
+                  ]}
+                  title="Admission"
+                />
               </div>
             </div>
           </div>
+          )}
+
+          {/* Visa Progress Section */}
+          {activeTab === "visa-progress" && (
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                <Icon icon="mdi:passport" className="text-xl text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Visa Progress</h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Create Gmail", option: false },
+                    { name: "Motivation Letter", option: false },
+                    { name: "CV", option: false },
+                    { name: "Passport", option: false },
+                    { name: "Biometric Photo", option: false },
+                    { name: "Blocked Account", option: false },
+                    { name: "Health Insurance ", option: false },
+                  ]}
+                  title="Essential Documents"
+                />
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Create GP Account", option: false },
+                    { name: "Application Form", option: false },
+                    { name: "Documents Uploaded", option: false },
+                    { name: "Submitted", option: false },
+                    { name: "Appointment Date", option: false },
+                    { name: "Interview", option: false },
+                    { name: "Dorms", option: false },
+                  ]}
+                  title="Admin"
+                />
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Travel Insurance", option: false },
+                    { name: "Flight Ticket (Dummy)", option: false },
+                  ]}
+                  title="Admission"
+                />
+              </div>
+            </div>
+          </div>
+          )}
+
+          {/* Visa Tracker Section */}
+          {activeTab === "visa-tracker" && (
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Icon icon="mdi:map-marker-check" className="text-xl text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Visa Tracker</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
+                <ApplicationOptions
+                  applicationId={id}
+                  optionsToCheck={[
+                    { name: "Application Document", option: false },
+                    { name: "Submit Documents", option: false },
+                    { name: "Client Review", option: false },
+                    { name: "Interview Preparation", option: false },
+                    { name: "Appointment Date", option: false },
+                  ]}
+                  title="Application Tracker"
+                />
+              </div>
+            </div>
+          </div>
+          )}
 
           {/* Special Notes Section */}
+          {activeTab === "notes" && (
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center">
@@ -1156,13 +1239,13 @@ const ApplicantDetail = () => {
             </div>
 
             <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-              <EditableField
-                label="Special Notes"
-                value={applicant.special_notes || ""}
-                onSave={(value) => handleFieldSave("special_notes", value)}
+              <SpecialNotesEditor
+                rawNotes={applicant.special_notes}
+                onSave={handleSpecialNotesSave}
               />
             </div>
           </div>
+          )}
         </div>
       </div>
 

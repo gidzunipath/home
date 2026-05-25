@@ -317,9 +317,10 @@ export const useAuthSystem = () => {
           showApplications: false,
           showCheckStatus: true,
           showContact: true,
+          showCareers: true,
           primaryAction: {
             type: "link",
-            href: `/client/${authState.user?.id}`,
+            href: `/student/${authState.user?.id}`,
             label: "My Portal",
             className:
               "text-appleGray-700 hover:text-sky-500 font-medium transition-colors duration-200",
@@ -390,6 +391,7 @@ export const useAuthSystem = () => {
           showApplications: true,
           showCheckStatus: false, // Hide Check Status for admin
           showContact: false, // Hide Contact for admin
+          showCareers: false,
           showAdminDropdown: true, // Add admin-specific dropdown
           adminDropdownItems,
           primaryAction: {
@@ -413,6 +415,7 @@ export const useAuthSystem = () => {
           showApplications: false, // Only admins should see Applications menu
           showCheckStatus: true,
           showContact: true,
+          showCareers: true,
           primaryAction: {
             type: "link",
             href: "/login",

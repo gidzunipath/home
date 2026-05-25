@@ -242,6 +242,34 @@ html {
   animation: scaleIn 0.4s ease-out;
 }
 
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.2s ease-in forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.2s ease-in forwards;
+}
+
 .animate-slide-in-left {
   animation: slideInLeft 0.5s ease-out;
 }
@@ -256,6 +284,30 @@ html {
 
 .animate-pulse-slow {
   animation: pulse 2s infinite;
+}
+
+.partner-marquee-mask {
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-partner-scroll {
+    animation: none;
+  }
 }
 
 /* Apple-style button hover effects */
@@ -766,11 +818,214 @@ html {
   }
 }
 
+/* Germany interactive map */
+.germany-map-bg {
+  background: linear-gradient(
+    145deg,
+    #f0f9ff 0%,
+    #fafafa 35%,
+    #fff1f2 70%,
+    #f0fdf4 100%
+  );
+}
+
+.germany-map-shell {
+  position: relative;
+  border-radius: 1.5rem;
+  padding: 0.75rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(240, 249, 255, 0.9) 100%
+  );
+  border: 1px solid rgba(14, 165, 233, 0.15);
+  box-shadow: var(--shadow-large);
+  backdrop-filter: blur(12px);
+}
+
+.germany-map-svg {
+  display: block;
+  user-select: none;
+}
+
+.germany-map-svg--fixed {
+  touch-action: manipulation;
+  pointer-events: none;
+}
+
+.germany-map-svg--fixed .germany-map-state,
+.germany-map-svg--fixed .germany-map-pin,
+.germany-map-svg--fixed .germany-map-hit-area,
+.germany-map-svg--fixed [role="button"] {
+  pointer-events: auto;
+}
+
+.germany-map-svg .rsm-geography {
+  transition: fill 0.35s var(--transition-apple), stroke 0.35s var(--transition-apple);
+}
+
+.germany-map-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.germany-map-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: #0284c7;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s var(--transition-apple), background 0.2s var(--transition-apple),
+    box-shadow 0.2s var(--transition-apple);
+}
+
+.germany-map-control-btn:hover:not(:disabled) {
+  transform: scale(1.06);
+  background: #fff;
+  box-shadow: var(--shadow-medium);
+}
+
+.germany-map-control-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.germany-map-pin-glow {
+  opacity: 0.35;
+  animation: mapPinPulse 2.2s ease-in-out infinite;
+}
+
+.germany-map-pin--active .germany-map-pin-glow {
+  opacity: 0.6;
+}
+
+.germany-map-pin-ring {
+  stroke-width: 2;
+  opacity: 0.5;
+  transition: opacity 0.2s var(--transition-apple), stroke-width 0.2s var(--transition-apple);
+}
+
+.germany-map-pin--active .germany-map-pin-ring {
+  opacity: 0.85;
+  stroke-width: 2.5;
+}
+
+.germany-map-pin-head {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  transition: filter 0.2s var(--transition-apple);
+}
+
+.germany-map-pin--active .germany-map-pin-head {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.22));
+}
+
+.germany-map-pin-core {
+  pointer-events: none;
+}
+
+@keyframes mapPinPulse {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  50% {
+    opacity: 0.48;
+  }
+}
+
+.germany-map-tooltip {
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.875rem;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid;
+  box-shadow: var(--shadow-medium);
+  backdrop-filter: blur(10px);
+  animation: mapTooltipIn 0.25s var(--transition-apple) forwards;
+}
+
+.germany-map-tooltip-city {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.germany-map-tooltip-state {
+  font-size: 0.75rem;
+  color: #6e6e73;
+  margin: 0.2rem 0 0;
+  line-height: 1.3;
+}
+
+@keyframes mapTooltipIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.germany-map-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s var(--transition-apple), box-shadow 0.2s var(--transition-apple),
+    border-color 0.2s var(--transition-apple);
+}
+
+.germany-map-legend-chip:hover,
+.germany-map-legend-chip--active {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--chip-color) 40%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--chip-color) 25%, transparent);
+}
+
+.germany-map-legend-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--chip-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--chip-color) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .germany-map-pin-glow {
+    animation: none;
+  }
+
+  .germany-map-tooltip {
+    animation: none;
+  }
+}
+
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
   .animate-fade-in,
+  .animate-fade-out,
   .animate-scale-in,
+  .animate-scale-out,
   .animate-slide-in-left,
   .animate-slide-in-right,
   .animate-float,
@@ -1325,6 +1580,36 @@ input[type="file"]::file-selector-button:hover {
   border-radius: 0.25rem 0.25rem 0 0;
 }
 
+/* ===== ADMIN LAYOUT DESIGN ENHANCEMENTS ===== */
+
+/* Sidebar active nav item — left-edge sky accent + elevated shadow */
+.admin-nav-active {
+  box-shadow: inset 3px 0 0 0 #38bdf8, 0 1px 4px rgba(14, 165, 233, 0.12);
+}
+
+/* Refined thin scrollbar for the main content area */
+.admin-main-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d2d2d7 transparent;
+}
+
+.admin-main-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.admin-main-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-main-scroll::-webkit-scrollbar-thumb {
+  background: #d2d2d7;
+  border-radius: 10px;
+}
+
+.admin-main-scroll::-webkit-scrollbar-thumb:hover {
+  background: #86868b;
+}
+
 /* Admin Panel Specific Styles */
 .line-clamp-2 {
   display: -webkit-box;
@@ -1451,4 +1736,243 @@ input[type="file"]::file-selector-button:hover {
     transparent
   );
   pointer-events: none;
+}
+
+/* German Life blog — Tiptap editor & article prose */
+.blog-editor-prose h1,
+.blog-prose h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 2rem 0 0.75rem;
+  line-height: 1.2;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.blog-editor-prose h2,
+.blog-prose h2 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin: 2.25rem 0 0.75rem;
+  color: #1e293b;
+  letter-spacing: -0.015em;
+}
+
+.blog-editor-prose h3,
+.blog-prose h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 1.75rem 0 0.5rem;
+  color: #1e293b;
+}
+
+.blog-editor-prose h4,
+.blog-prose h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.4rem;
+  color: #334155;
+}
+
+.blog-editor-prose p,
+.blog-prose p {
+  margin: 0 0 1.25rem 0;
+  line-height: 1.85;
+  color: #334155;
+}
+
+.blog-editor-prose p:last-child,
+.blog-prose p:last-child {
+  margin-bottom: 0;
+}
+
+.blog-editor-prose ul,
+.blog-prose ul {
+  list-style: disc;
+  padding-left: 1.75rem;
+  margin: 0 0 1.25rem 0;
+}
+
+.blog-editor-prose ol,
+.blog-prose ol {
+  list-style: decimal;
+  padding-left: 1.75rem;
+  margin: 0 0 1.25rem 0;
+}
+
+.blog-editor-prose li,
+.blog-prose li {
+  margin-bottom: 0.4rem;
+  line-height: 1.75;
+  color: #334155;
+}
+
+.blog-editor-prose blockquote,
+.blog-prose blockquote {
+  border-left: 3px solid #38bdf8;
+  padding: 0.75rem 1.25rem;
+  margin: 1.75rem 0;
+  background: #f0f9ff;
+  border-radius: 0 0.75rem 0.75rem 0;
+  color: #475569;
+  font-style: italic;
+  font-size: 1.05rem;
+}
+
+.blog-editor-prose hr,
+.blog-prose hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2.5rem 0;
+}
+
+.blog-editor-prose mark,
+.blog-prose mark {
+  background: #fef9c3;
+  padding: 0.05em 0.2em;
+  border-radius: 3px;
+  color: #92400e;
+}
+
+.blog-editor-prose a,
+.blog-prose a {
+  color: #0284c7;
+  text-decoration: underline;
+  text-decoration-color: #bae6fd;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+
+.blog-editor-prose a:hover,
+.blog-prose a:hover {
+  color: #0369a1;
+}
+
+.blog-editor-prose strong,
+.blog-prose strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.blog-editor-prose code,
+.blog-prose code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.875em;
+  color: #be185d;
+}
+
+.blog-image-full,
+.blog-prose img.blog-image-full {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 1.75rem 0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+
+.blog-image-thumbnail,
+.blog-prose img.blog-image-thumbnail {
+  max-width: 220px;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 0.75rem 0;
+  border: 1px solid #e2e8f0;
+}
+
+.blog-editor-prose table,
+.blog-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.75rem 0;
+  font-size: 0.9rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.blog-editor-prose th,
+.blog-editor-prose td,
+.blog-prose th,
+.blog-prose td {
+  border: 1px solid #e2e8f0;
+  padding: 0.65rem 1rem;
+  text-align: left;
+  color: #334155;
+}
+
+.blog-editor-prose th,
+.blog-prose th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.blog-youtube-embed {
+  width: 100%;
+  max-width: 680px;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 1rem;
+  margin: 1.75rem 0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+
+.blog-callout {
+  border-radius: 0.875rem;
+  padding: 1rem 1.25rem;
+  margin: 1.75rem 0;
+  border-left: 4px solid #38bdf8;
+  background: #f0f9ff;
+}
+
+.blog-callout-note {
+  border-left-color: #38bdf8;
+  background: #f0f9ff;
+}
+
+.blog-callout-tip {
+  border-left-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.blog-callout-warning {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.blog-faq-section {
+  margin: 2rem 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.blog-faq-item {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.blog-faq-item:last-child {
+  border-bottom: none;
+}
+
+.blog-faq-question {
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.blog-faq-answer {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }

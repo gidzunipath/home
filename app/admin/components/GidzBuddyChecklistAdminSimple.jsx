@@ -9,8 +9,10 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 const GidzBuddyChecklistAdminSimple = () => {
+  const { showError, showConfirm } = useAppModal();
   const [checklistItems, setChecklistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState(null);
@@ -70,18 +72,22 @@ const GidzBuddyChecklistAdminSimple = () => {
         resetForm();
         setShowAddForm(false);
       } else {
-        alert("Error: " + result.error);
+        showError(result.error);
       }
     } catch (error) {
       console.error("Error saving checklist item:", error);
-      alert("Error saving checklist item");
+      showError("Error saving checklist item");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this item?")) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Item",
+      message: "Are you sure you want to delete this item?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/gidz-buddy-checklist?id=${id}`, {
@@ -93,11 +99,11 @@ const GidzBuddyChecklistAdminSimple = () => {
       if (result.success) {
         await fetchChecklistItems();
       } else {
-        alert("Error deleting item: " + result.error);
+        showError("Error deleting item: " + result.error);
       }
     } catch (error) {
       console.error("Error deleting checklist item:", error);
-      alert("Error deleting checklist item");
+      showError("Error deleting checklist item");
     }
   };
 
