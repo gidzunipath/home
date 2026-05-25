@@ -1,15 +1,8 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  FaBriefcase,
-  FaCheckCircle,
-  FaPaperPlane,
-  FaUsers,
-  FaRocket,
-  FaHeart,
-  FaUpload,
-} from "react-icons/fa";
+import Image from "next/image";
+import { FaCheckCircle, FaPaperPlane, FaUpload } from "react-icons/fa";
 import {
   CAREER_POSITIONS,
   RESUME_ALLOWED_EXTENSIONS,
@@ -26,9 +19,9 @@ function SuccessDialog({ onClose }) {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100">
           <FaCheckCircle className="h-8 w-8 text-sky-500" />
         </div>
-        <h3 className="mb-2 text-2xl font-bold text-appleGray-900">Success!</h3>
+        <h3 className="mb-2 text-2xl font-bold text-appleGray-900">Application received</h3>
         <p className="mb-6 text-appleGray-600">
-          Thank you for your interest, our team will review your appliaction and reach you out
+          Thank you for your interest. Our team will review your application and get back to you soon.
         </p>
         <button
           type="button"
@@ -157,121 +150,188 @@ export default function CareersPage() {
     }`;
 
   return (
-    <div className="min-h-screen bg-appleGray-50 relative overflow-hidden">
-      <div className="absolute top-32 left-10 w-20 h-20 bg-sky-400/10 rounded-full animate-float" />
-      <section className="relative overflow-hidden bg-gradient-to-br from-appleGray-50 via-white to-appleGray-100 pt-24 pb-16">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <div className="space-y-8 animate-fade-in-up">
-            <div className="w-20 h-20 bg-gradient-to-br from-sky-500 to-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-soft">
-              <FaBriefcase className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-4xl lg:text-6xl font-bold text-appleGray-900">
-              Join Our
-              <span className="block text-gradient bg-gradient-to-r from-sky-500 to-sky-600 bg-clip-text text-transparent">
-                Team
+    <div className="min-h-screen bg-appleGray-50">
+      <section className="relative min-h-[420px] sm:min-h-[480px] lg:min-h-[520px] flex items-center overflow-hidden">
+        <Image
+          src="/carrerPage.png"
+          alt="GIDZ UniPath team at work"
+          fill
+          priority
+          className="object-cover object-[75%_center] sm:object-[70%_center] lg:object-[center_30%]"
+          sizes="100vw"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-50% to-black/20 lg:to-transparent"
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent sm:hidden"
+          aria-hidden
+        />
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 sm:pb-16">
+          <div className="max-w-xl">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+              Build careers that
+              <span className="block mt-1 bg-gradient-to-r from-sky-300 to-sky-400 bg-clip-text text-transparent">
+                change lives
               </span>
             </h1>
-            <p className="text-xl text-appleGray-600 max-w-2xl mx-auto">
-              Build your career with GIDZ UniPath. We are looking for passionate people who want to help students achieve their dreams abroad.
+            <p className="mt-5 text-base sm:text-lg text-white/80 leading-relaxed max-w-md">
+              Join GIDZ UniPath and help Sri Lankan students reach their goals in
+              Germany.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto pt-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FaUsers className="w-8 h-8 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-appleGray-900">Collaborative</h3>
-                <p className="text-appleGray-600">Supportive team culture</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FaRocket className="w-8 h-8 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-appleGray-900">Growth</h3>
-                <p className="text-appleGray-600">Learn and advance with us</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FaHeart className="w-8 h-8 text-sky-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-appleGray-900">Purpose</h3>
-                <p className="text-appleGray-600">Meaningful impact every day</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
-      <section className="py-16 bg-gradient-to-br from-sky-500/5 to-sky-600/5 relative">
+
+      <section className="py-12 sm:py-16 lg:py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-large relative overflow-hidden">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-sky-500 to-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <FaPaperPlane className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl lg:text-3xl font-bold text-appleGray-900 mb-2">Apply Now</h2>
-              <p className="text-appleGray-600">Submit your application and our team will be in touch.</p>
-            </div>
+          <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 shadow-large">
+            <h2 className="text-2xl font-bold text-appleGray-900 mb-1">
+              Submit your application
+            </h2>
+            <p className="text-appleGray-600 mb-8">
+              All fields marked with * are required. We typically respond within a
+              few business days.
+            </p>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-appleGray-700 mb-2">Full Name *</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Enter your full name" className={inputClass("fullName")} />
-                {errors.fullName && <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>}
+                <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                  Full name *
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Your full name"
+                  className={inputClass("fullName")}
+                />
+                {errors.fullName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+                )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-appleGray-700 mb-2">Email Address *</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" className={inputClass("email")} />
-                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                  <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="you@example.com"
+                    className={inputClass("email")}
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-appleGray-700 mb-2">Phone Number *</label>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Enter your phone number" className={inputClass("phone")} />
-                  {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+                  <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                    Phone *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+94 7X XXX XXXX"
+                    className={inputClass("phone")}
+                  />
+                  {errors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  )}
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-appleGray-700 mb-2">Applying Position *</label>
-                <select name="position" value={formData.position} onChange={handleChange} className={inputClass("position")}>
-                  <option value="">Select a position</option>
+                <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                  Position *
+                </label>
+                <select
+                  name="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                  className={inputClass("position")}
+                >
+                  <option value="">Choose a role</option>
                   {CAREER_POSITIONS.map((pos) => (
-                    <option key={pos} value={pos}>{pos}</option>
+                    <option key={pos} value={pos}>
+                      {pos}
+                    </option>
                   ))}
                 </select>
-                {errors.position && <p className="mt-1 text-sm text-red-600">{errors.position}</p>}
+                {errors.position && (
+                  <p className="mt-1 text-sm text-red-600">{errors.position}</p>
+                )}
               </div>
+
               <div>
-                <label className="block text-sm font-semibold text-appleGray-700 mb-2">Resume Upload *</label>
+                <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                  Resume *
+                </label>
                 <div className="relative">
-                  <input ref={fileInputRef} type="file" accept={ACCEPT_ATTR} onChange={handleResumeChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  <div className={`flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-4 py-8 transition-colors ${
-                    errors.resume ? "border-red-300 bg-red-50" : "border-appleGray-200 bg-appleGray-50 hover:border-sky-400"
-                  }`}>
-                    <FaUpload className="w-6 h-6 text-sky-500" />
-                    <div className="text-center">
-                      <p className="font-medium text-appleGray-800">{resume ? resume.name : "Click to upload resume"}</p>
-                      <p className="text-sm text-appleGray-500">PDF, DOC, or DOCX (max 5MB)</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={ACCEPT_ATTR}
+                    onChange={handleResumeChange}
+                    className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                  />
+                  <div
+                    className={`flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-4 py-8 transition-colors ${
+                      errors.resume
+                        ? "border-red-300 bg-red-50"
+                        : "border-appleGray-200 bg-appleGray-50 hover:border-sky-400"
+                    }`}
+                  >
+                    <FaUpload className="h-6 w-6 shrink-0 text-sky-500" />
+                    <div className="text-center min-w-0">
+                      <p className="font-medium text-appleGray-800 truncate">
+                        {resume ? resume.name : "Drop your resume or click to browse"}
+                      </p>
+                      <p className="text-sm text-appleGray-500">
+                        PDF, DOC, or DOCX · max 5MB
+                      </p>
                     </div>
                   </div>
                 </div>
-                {errors.resume && <p className="mt-1 text-sm text-red-600">{errors.resume}</p>}
+                {errors.resume && (
+                  <p className="mt-1 text-sm text-red-600">{errors.resume}</p>
+                )}
               </div>
-              {errors.submit && <p className="text-sm text-red-600 text-center">{errors.submit}</p>}
-              <button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-white py-4 rounded-2xl font-semibold hover:from-sky-600 hover:to-sky-700 transition-all duration-300 btn-apple-hover shadow-soft flex items-center justify-center disabled:opacity-60">
+
+              {errors.submit && (
+                <p className="text-center text-sm text-red-600">{errors.submit}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-sky-600 py-4 font-semibold text-white shadow-soft transition-all duration-300 hover:from-sky-600 hover:to-sky-700 disabled:opacity-60 btn-apple-hover"
+              >
                 {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
-                    <span>Submitting...</span>
-                  </div>
+                  <>
+                    <span className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Submitting…
+                  </>
                 ) : (
-                  <div className="flex items-center">
-                    <FaPaperPlane className="w-5 h-5 mr-3" />
-                    <span>Submit Application</span>
-                  </div>
+                  <>
+                    <FaPaperPlane className="mr-3 h-5 w-5" />
+                    Submit application
+                  </>
                 )}
               </button>
             </form>
           </div>
         </div>
       </section>
+
       {showSuccess && <SuccessDialog onClose={() => setShowSuccess(false)} />}
     </div>
   );

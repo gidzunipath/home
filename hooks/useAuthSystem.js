@@ -320,7 +320,7 @@ export const useAuthSystem = () => {
           showCareers: true,
           primaryAction: {
             type: "link",
-            href: `/client/${authState.user?.id}`,
+            href: `/student/${authState.user?.id}`,
             label: "My Portal",
             className:
               "text-appleGray-700 hover:text-sky-500 font-medium transition-colors duration-200",

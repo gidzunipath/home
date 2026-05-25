@@ -3,12 +3,137 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { Icon } from "@iconify/react";
 
+const ModalBackdrop = ({ onClick }) => (
+  <div
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fade-in"
+    onClick={onClick}
+  />
+);
+
 const WorkDetails = () => {
   const [work, setWork] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cvUrl, setCvUrl] = useState(null);
   const [transcriptUrl, setTranscriptUrl] = useState(null);
   const [bachelorsUrl, setBachelorsUrl] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [assignedStaff, setAssignedStaff] = useState(null);
+  const [assignedAt, setAssignedAt] = useState(null);
+  const [staffMembers, setStaffMembers] = useState([]);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedStaffId, setSelectedStaffId] = useState("");
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const response = await fetch("/api/admin-auth/validate");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setCurrentUser(data.admin);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role === "staff") return;
+
+    const fetchStaffMembers = async () => {
+      try {
+        const response = await fetch("/api/admin/staff");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setStaffMembers(data.staff);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching staff members:", error);
+      }
+    };
+
+    fetchStaffMembers();
+  }, [currentUser]);
+
+  const fetchAssignedStaff = async (staffId) => {
+    if (!staffId) {
+      setAssignedStaff(null);
+      setAssignedAt(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/staff/by-ids", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staffIds: [staffId] }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.staff.length > 0) {
+          setAssignedStaff(result.staff[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching assigned staff:", error);
+    }
+  };
+
+  const assignWork = async () => {
+    if (!work || !selectedStaffId) return;
+
+    try {
+      const response = await fetch("/api/admin/assign-work", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workId: work.id,
+          staffId: selectedStaffId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setAssignedStaff(data.assignedStaff);
+          setAssignedAt(new Date().toISOString());
+          setIsAssignModalOpen(false);
+          setSelectedStaffId("");
+        }
+      }
+    } catch (error) {
+      console.error("Error assigning work:", error);
+    }
+  };
+
+  const unassignWork = async () => {
+    if (!work) return;
+
+    try {
+      const response = await fetch("/api/admin/assign-work", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workId: work.id }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setAssignedStaff(null);
+          setAssignedAt(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error unassigning work:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchWorkDetails = async () => {
@@ -30,6 +155,9 @@ const WorkDetails = () => {
       } else {
         const parsedData = data.data ? JSON.parse(data.data) : {};
         setWork({ id: data.id, ...parsedData });
+        setAssignedAt(data.assigned_at || null);
+        setSelectedStaffId(data.assigned_to || "");
+        await fetchAssignedStaff(data.assigned_to);
 
         // Fetch file URL from Supabase Storage
         const fetchFileUrls = async (fileName) => {
@@ -172,6 +300,73 @@ const WorkDetails = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
+          {/* Assignment */}
+          <div className="bg-white rounded-3xl shadow-large border border-appleGray-200 overflow-hidden">
+            <div className="bg-appleGray-50 px-6 py-4 border-b border-appleGray-200">
+              <h2 className="text-xl font-semibold text-appleGray-800 flex items-center space-x-2">
+                <Icon
+                  icon="material-symbols:assignment-ind"
+                  className="text-xl text-purple-500"
+                />
+                <span>Assignment</span>
+              </h2>
+            </div>
+            <div className="p-6">
+              {assignedStaff ? (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-xl flex items-center justify-center">
+                      <Icon
+                        icon="material-symbols:person-check"
+                        className="text-white text-lg"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-appleGray-900">
+                        {assignedStaff.first_name} {assignedStaff.last_name}
+                      </div>
+                      <div className="text-sm text-appleGray-500">
+                        {assignedStaff.role}
+                        {assignedStaff.department &&
+                          ` • ${assignedStaff.department}`}
+                      </div>
+                      {assignedAt && (
+                        <div className="text-xs text-appleGray-400 mt-1">
+                          Assigned on{" "}
+                          {new Date(assignedAt).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {currentUser?.role !== "staff" && (
+                    <button
+                      onClick={unassignWork}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 transition-colors duration-200"
+                    >
+                      <Icon icon="material-symbols:person-remove" className="text-base" />
+                      <span>Unassign</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <p className="text-sm text-appleGray-500">
+                    No staff member assigned to this application yet.
+                  </p>
+                  {currentUser?.role !== "staff" && (
+                    <button
+                      onClick={() => setIsAssignModalOpen(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-purple-500 hover:bg-purple-600 transition-colors duration-200"
+                    >
+                      <Icon icon="material-symbols:person-add" className="text-base" />
+                      <span>Assign Staff</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Personal Information */}
           <div className="bg-white rounded-3xl shadow-large border border-appleGray-200 overflow-hidden">
             <div className="bg-appleGray-50 px-6 py-4 border-b border-appleGray-200">
@@ -422,6 +617,62 @@ const WorkDetails = () => {
           </div>
         </div>
       </div>
+
+      {isAssignModalOpen && (
+        <>
+          <ModalBackdrop onClick={() => setIsAssignModalOpen(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in">
+            <div className="bg-white rounded-2xl border border-appleGray-200 shadow-medium w-full max-w-md">
+              <div className="border-b border-appleGray-100 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-base font-bold text-appleGray-900">
+                  Assign Staff Member
+                </h2>
+                <button
+                  onClick={() => setIsAssignModalOpen(false)}
+                  className="w-8 h-8 bg-appleGray-100 hover:bg-appleGray-200 rounded-xl flex items-center justify-center transition-colors duration-200"
+                >
+                  <Icon icon="material-symbols:close" className="text-lg text-appleGray-500" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <label className="block text-xs font-semibold text-appleGray-500 uppercase tracking-wider mb-2">
+                  Select Staff Member
+                </label>
+                <select
+                  value={selectedStaffId}
+                  onChange={(e) => setSelectedStaffId(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-appleGray-50 border border-appleGray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm mb-5"
+                >
+                  <option value="">Choose staff member...</option>
+                  {staffMembers.map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.first_name} {staff.last_name} - {staff.role}
+                      {staff.department && ` (${staff.department})`}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={assignWork}
+                    disabled={!selectedStaffId}
+                    className="flex-1 bg-purple-500 hover:bg-purple-600 disabled:bg-appleGray-200 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
+                  >
+                    Assign Work
+                  </button>
+                  <button
+                    onClick={() => setIsAssignModalOpen(false)}
+                    className="flex-1 bg-appleGray-100 hover:bg-appleGray-200 text-appleGray-700 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import AppProviders from "./components/AppProviders";
 import ConditionalSiteChrome from "./components/ConditionalSiteChrome";
 import SiteFooter from "./components/SiteFooter";
 
@@ -35,9 +36,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-appleGray-50`}
       >
-        <ConditionalSiteChrome footer={<SiteFooter />}>
-          {children}
-        </ConditionalSiteChrome>
+        <AppProviders>
+          <ConditionalSiteChrome footer={<SiteFooter />}>
+            {children}
+          </ConditionalSiteChrome>
+        </AppProviders>
       </body>
     </html>
   );

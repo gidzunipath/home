@@ -11,6 +11,7 @@ import {
   FaExclamationTriangle,
   FaTimes,
 } from "react-icons/fa";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 function ConfirmDeleteModal({ applicant, type, loading, onCancel, onConfirm }) {
   const isPermanent = type === "permanent";
@@ -122,6 +123,7 @@ function formatDate(iso) {
 }
 
 export default function JobSeekersManagement() {
+  const { showError } = useAppModal();
   const [applicants, setApplicants] = useState([]);
   const [tableLoading, setTableLoading] = useState(true);
   const [view, setView] = useState("active");
@@ -167,10 +169,10 @@ export default function JobSeekersManagement() {
         setConfirmModal(null);
         await fetchApplicants();
       } else {
-        alert(result.error || "Failed to delete application.");
+        showError(result.error || "Failed to delete application.");
       }
     } catch {
-      alert("Failed to delete application.");
+      showError("Failed to delete application.");
     } finally {
       setActionLoading(null);
     }
@@ -188,10 +190,10 @@ export default function JobSeekersManagement() {
         setConfirmModal(null);
         await fetchApplicants();
       } else {
-        alert(result.error || "Failed to permanently delete application.");
+        showError(result.error || "Failed to permanently delete application.");
       }
     } catch {
-      alert("Failed to permanently delete application.");
+      showError("Failed to permanently delete application.");
     } finally {
       setActionLoading(null);
     }

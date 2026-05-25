@@ -16,13 +16,12 @@ const StudentQuery = () => {
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [referralFilterOnly, setReferralFilterOnly] = useState(false);
   const [filteredStudents, setFilteredStudents] = useState([]);
-  const [staffMembers, setStaffMembers] = useState([]);
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [studentToAssign, setStudentToAssign] = useState(null);
-  const [selectedStaffId, setSelectedStaffId] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [referralLookupId, setReferralLookupId] = useState(null);
+  const [referralErrorModal, setReferralErrorModal] = useState(null);
 
   // Get current user information
   useEffect(() => {
@@ -33,13 +32,13 @@ const StudentQuery = () => {
           const data = await response.json();
           if (data.success) {
             setCurrentUser(data.admin);
+            return;
           }
         }
       } catch (error) {
         console.error("Error fetching current user:", error);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     getCurrentUser();
@@ -50,6 +49,8 @@ const StudentQuery = () => {
     if (!currentUser) return;
 
     const fetchStudents = async () => {
+      setIsLoading(true);
+      try {
       // First get the student visa data
       let query = supabase.from("student_visa").select("*");
 
@@ -68,181 +69,37 @@ const StudentQuery = () => {
 
       console.log("🔍 Raw student data from database:", data);
 
-      // Get all unique assigned staff IDs
-      const assignedStaffIds = data
-        .filter((row) => row.assigned_to)
-        .map((row) => row.assigned_to);
-
-      console.log("🔍 Assigned staff IDs:", assignedStaffIds);
-
-      // Fetch staff information for assigned students using API
-      let staffData = [];
-      if (assignedStaffIds.length > 0) {
-        console.log("🔍 Fetching staff for IDs via API:", assignedStaffIds);
-        try {
-          const response = await fetch("/api/admin/staff/by-ids", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ staffIds: assignedStaffIds }),
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-              staffData = result.staff;
-              console.log("🔍 Fetched staff data via API:", staffData);
-              console.log(
-                "🔍 Staff IDs in fetched data:",
-                staffData.map((s) => s.id)
-              );
-            } else {
-              console.error("API error fetching staff:", result.error);
-            }
-          } else {
-            console.error("HTTP error fetching staff:", response.status);
-          }
-        } catch (error) {
-          console.error("Error fetching staff data via API:", error);
-        }
-      }
-
-      // Process and combine the data
-      const parsedData = [];
-
-      for (const row of data) {
-        const studentData = JSON.parse(row.data); // Convert JSON string to object
-
-        // Find assigned staff member
-        let assignedStaff = staffData.find(
-          (staff) => staff.id === row.assigned_to
-        );
-
-        // Debug staff lookup
-        if (row.assigned_to) {
-          console.log(`🔍 Looking for staff with ID: ${row.assigned_to}`);
-          console.log(
-            `🔍 Available staff IDs:`,
-            staffData.map((s) => s.id)
-          );
-          console.log(`🔍 Staff match found:`, assignedStaff);
-          console.log(`🔍 ID comparison:`, {
-            looking_for: row.assigned_to,
-            looking_for_type: typeof row.assigned_to,
-            available_ids: staffData.map((s) => ({
-              id: s.id,
-              type: typeof s.id,
-            })),
-          });
-
-          // If not found in bulk fetch, try individual fetch via API
-          if (!assignedStaff) {
-            console.log(
-              `🔍 Staff not found in bulk fetch, trying individual fetch for ${row.assigned_to}`
-            );
-            try {
-              const response = await fetch("/api/admin/staff/by-ids", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ staffIds: [row.assigned_to] }),
-              });
-
-              if (response.ok) {
-                const result = await response.json();
-                if (result.success && result.staff.length > 0) {
-                  assignedStaff = result.staff[0];
-                  console.log(
-                    `✅ Found staff via individual fetch:`,
-                    assignedStaff
-                  );
-                } else {
-                  console.log(`❌ No staff found for ID ${row.assigned_to}`);
-                }
-              } else {
-                console.error(
-                  `❌ HTTP error fetching individual staff ${row.assigned_to}:`,
-                  response.status
-                );
-              }
-            } catch (err) {
-              console.error(`❌ Exception during individual staff fetch:`, err);
-            }
-          }
-        }
-
-        const processedStudent = {
+      const parsedData = data.map((row) => {
+        const studentData = JSON.parse(row.data);
+        return {
           id: row.id,
-          assigned_to: row.assigned_to,
-          assigned_staff: assignedStaff || null,
-          assigned_at: row.assigned_at,
-          assigned_by: row.assigned_by,
           ...studentData,
-          MarkasRead: studentData.MarkasRead ?? false, // Default to false if missing
+          MarkasRead: studentData.MarkasRead ?? false,
         };
+      });
 
-        // Debug assignment info
-        if (row.assigned_to) {
-          console.log(`🔍 Student ${row.id} assignment info:`);
-          console.log(`   assigned_to: ${row.assigned_to}`);
-          console.log(`   assigned_staff:`, assignedStaff);
-          console.log(`   assigned_at: ${row.assigned_at}`);
-        }
-
-        parsedData.push(processedStudent);
-      }
-
-      console.log("🔍 Processed students:", parsedData);
       setStudents(parsedData);
       setFilteredStudents(parsedData);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchStudents();
   }, [currentUser]);
 
-  // Fetch staff members for assignment (only for admin/super_admin)
+  // Filter students based on search term and referral code
   useEffect(() => {
-    if (!currentUser || currentUser.role === "staff") return;
+    let filtered = students;
 
-    const fetchStaffMembers = async () => {
-      try {
-        console.log("🔍 Fetching staff members...");
-        const response = await fetch("/api/admin/staff");
-        console.log("📡 Response status:", response.status);
+    if (referralFilterOnly) {
+      filtered = filtered.filter((student) =>
+        student.AdditionalInformation?.ReferenceCode?.trim()
+      );
+    }
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("📊 Response data:", data);
-
-          if (data.success) {
-            console.log("✅ Setting staff members:", data.staff);
-            setStaffMembers(data.staff);
-          } else {
-            console.error("❌ API returned success: false", data);
-          }
-        } else {
-          console.error(
-            "❌ Response not ok:",
-            response.status,
-            response.statusText
-          );
-        }
-      } catch (error) {
-        console.error("❌ Error fetching staff members:", error);
-      }
-    };
-
-    fetchStaffMembers();
-  }, [currentUser]);
-
-  // Filter students based on search term
-  useEffect(() => {
-    if (!searchTerm) {
-      setFilteredStudents(students);
-    } else {
-      const filtered = students.filter(
+    if (searchTerm) {
+      filtered = filtered.filter(
         (student) =>
           student.PersonalInformation?.FirstName?.toLowerCase().includes(
             searchTerm.toLowerCase()
@@ -254,9 +111,10 @@ const StudentQuery = () => {
             searchTerm.toLowerCase()
           )
       );
-      setFilteredStudents(filtered);
     }
-  }, [searchTerm, students]);
+
+    setFilteredStudents(filtered);
+  }, [searchTerm, referralFilterOnly, students]);
 
   // Toggle MarkasRead status
   const toggleMarkasRead = async (studentId, currentStatus) => {
@@ -296,94 +154,6 @@ const StudentQuery = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // Open Assignment Modal
-  const openAssignModal = (student) => {
-    console.log("🔍 Opening assignment modal for student:", student);
-    console.log("🔍 Current staff members:", staffMembers);
-    console.log("🔍 Current user:", currentUser);
-    setStudentToAssign(student);
-    setSelectedStaffId(student.assigned_to || "");
-    setIsAssignModalOpen(true);
-  };
-
-  // Assign Student to Staff
-  const assignStudent = async () => {
-    if (!studentToAssign || !selectedStaffId) return;
-
-    try {
-      const response = await fetch("/api/admin/assign-student", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studentId: studentToAssign.id,
-          staffId: selectedStaffId,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          // Update the student in the local state
-          setStudents((prevStudents) =>
-            prevStudents.map((student) =>
-              student.id === studentToAssign.id
-                ? {
-                    ...student,
-                    assigned_to: selectedStaffId,
-                    assigned_staff: data.assignedStaff,
-                    assigned_at: new Date().toISOString(),
-                  }
-                : student
-            )
-          );
-          setIsAssignModalOpen(false);
-          setStudentToAssign(null);
-          setSelectedStaffId("");
-        }
-      }
-    } catch (error) {
-      console.error("Error assigning student:", error);
-    }
-  };
-
-  // Unassign Student from Staff
-  const unassignStudent = async (studentId) => {
-    try {
-      const response = await fetch("/api/admin/assign-student", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studentId,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          // Update the student in the local state
-          setStudents((prevStudents) =>
-            prevStudents.map((student) =>
-              student.id === studentId
-                ? {
-                    ...student,
-                    assigned_to: null,
-                    assigned_staff: null,
-                    assigned_at: null,
-                  }
-                : student
-            )
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error unassigning student:", error);
-    }
-  };
-
   // Delete Student
   const deleteStudent = async () => {
     if (!studentToDelete) return;
@@ -408,6 +178,40 @@ const StudentQuery = () => {
   const openNewTab = (student) => {
     sessionStorage.setItem("selectedStudentId", student.id);
     window.open("/admin/entries/view-student", "_blank");
+  };
+
+  const showReferralError = (code) => {
+    setReferralErrorModal({
+      code: code?.trim() || null,
+      message:
+        "No application was found for this referral code.",
+    });
+  };
+
+  const handleReferralClick = async (code) => {
+    if (!code?.trim()) {
+      showReferralError(code);
+      return;
+    }
+
+    setReferralLookupId(code);
+    try {
+      const response = await fetch(
+        `/api/admin/referral-lookup?code=${encodeURIComponent(code.trim())}`
+      );
+      const data = await response.json();
+
+      if (response.ok && data.success && data.found) {
+        window.open(`/applications/${data.id}`, "_blank");
+      } else {
+        showReferralError(code);
+      }
+    } catch (error) {
+      console.error("Error looking up referral code:", error);
+      showReferralError(code);
+    } finally {
+      setReferralLookupId(null);
+    }
   };
 
   return (
@@ -443,8 +247,22 @@ const StudentQuery = () => {
                     />
                   </div>
                 </div>
-                <div className="text-xs text-appleGray-400 font-medium">
-                  {filteredStudents.length} of {students.length} applications
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setReferralFilterOnly((prev) => !prev)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 whitespace-nowrap ${
+                      referralFilterOnly
+                        ? "bg-sky-500 text-white shadow-sm"
+                        : "bg-appleGray-100 text-appleGray-600 hover:bg-appleGray-200"
+                    }`}
+                  >
+                    <Icon icon="material-symbols:confirmation-number" className="text-sm" />
+                    <span>With referral code</span>
+                  </button>
+                  <div className="text-xs text-appleGray-400 font-medium">
+                    {filteredStudents.length} of {students.length} applications
+                  </div>
                 </div>
               </div>
             </div>
@@ -469,8 +287,8 @@ const StudentQuery = () => {
                       </th>
                       <th className="px-5 py-3 text-left text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
                         <div className="flex items-center gap-1.5">
-                          <Icon icon="material-symbols:assignment-ind" className="text-sm" />
-                          <span>Assignment</span>
+                          <Icon icon="material-symbols:confirmation-number" className="text-sm" />
+                          <span>Referral code</span>
                         </div>
                       </th>
                       <th className="px-5 py-3 text-center text-xs font-semibold text-appleGray-500 uppercase tracking-wider">
@@ -516,78 +334,35 @@ const StudentQuery = () => {
                         </td>
                         <td className="px-5 py-3.5">
                           {(() => {
-                            // Debug assignment display
-                            console.log(
-                              `🔍 Rendering assignment for student ${student.id}:`,
-                              {
-                                assigned_to: student.assigned_to,
-                                assigned_staff: student.assigned_staff,
-                                assigned_at: student.assigned_at,
-                              }
-                            );
-
-                            if (student.assigned_staff) {
-                              return (
-                                <div className="space-y-1">
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                      <Icon
-                                        icon="material-symbols:person-check"
-                                        className="text-white text-xs"
-                                      />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="font-medium text-appleGray-800 text-sm truncate">
-                                        {student.assigned_staff.first_name}{" "}
-                                        {student.assigned_staff.last_name}
-                                      </div>
-                                      <div className="text-xs text-appleGray-500 truncate">
-                                        {student.assigned_staff.role}
-                                        {student.assigned_staff.department &&
-                                          ` • ${student.assigned_staff.department}`}
-                                      </div>
-                                    </div>
-                                    {currentUser?.role !== "staff" && (
-                                      <button
-                                        onClick={() =>
-                                          unassignStudent(student.id)
-                                        }
-                                        className="text-red-400 hover:text-red-600 p-1 rounded transition-colors duration-200 flex-shrink-0"
-                                        title="Unassign"
-                                      >
-                                        <Icon
-                                          icon="material-symbols:close"
-                                          className="text-sm"
-                                        />
-                                      </button>
-                                    )}
-                                  </div>
-                                  {student.assigned_at && (
-                                    <div className="text-xs text-appleGray-400">
-                                      Assigned:{" "}
-                                      {new Date(
-                                        student.assigned_at
-                                      ).toLocaleDateString()}
-                                    </div>
+                            const referralCode =
+                              student.AdditionalInformation?.ReferenceCode?.trim();
+                            return (
+                              <div className="flex items-center gap-2">
+                                <div className="text-sm text-appleGray-600 font-mono truncate max-w-[100px]">
+                                  {referralCode || (
+                                    <span className="text-appleGray-300 font-sans">—</span>
                                   )}
                                 </div>
-                              );
-                            } else {
-                              return (
-                                currentUser?.role !== "staff" && (
+                                {referralCode && (
                                   <button
-                                    onClick={() => openAssignModal(student)}
-                                    className="inline-flex items-center space-x-1 text-xs text-sky-600 hover:text-sky-700 font-medium transition-colors duration-200"
+                                    type="button"
+                                    onClick={() => handleReferralClick(referralCode)}
+                                    disabled={referralLookupId === referralCode}
+                                    className="p-1.5 rounded-lg text-sky-600 hover:bg-sky-50 border border-transparent hover:border-sky-100 transition-colors duration-200 disabled:opacity-50"
+                                    title="View referrer details"
                                   >
                                     <Icon
-                                      icon="material-symbols:add"
-                                      className="text-sm"
+                                      icon={
+                                        referralLookupId === referralCode
+                                          ? "material-symbols:progress-activity"
+                                          : "material-symbols:link"
+                                      }
+                                      className={`text-base ${referralLookupId === referralCode ? "animate-spin" : ""}`}
                                     />
-                                    <span>Assign Staff</span>
                                   </button>
-                                )
-                              );
-                            }
+                                )}
+                              </div>
+                            );
                           })()}
                         </td>
                         <td className="px-5 py-3.5 text-center">
@@ -647,15 +422,15 @@ const StudentQuery = () => {
                       />
                     </div>
                     <h3 className="text-sm font-semibold text-appleGray-700 mb-1">
-                      {searchTerm
+                      {searchTerm || referralFilterOnly
                         ? "No students found"
                         : currentUser?.role === "staff"
                         ? "No assigned applications"
                         : "No student applications yet"}
                     </h3>
                     <p className="text-xs text-appleGray-400">
-                      {searchTerm
-                        ? "Try adjusting your search criteria"
+                      {searchTerm || referralFilterOnly
+                        ? "Try adjusting your search or filter criteria"
                         : currentUser?.role === "staff"
                         ? "You haven't been assigned any student visa applications yet"
                         : "Student visa applications will appear here once submitted"}
@@ -666,85 +441,45 @@ const StudentQuery = () => {
             </div>
           </div>
 
-          {/* Assignment Modal */}
-          {isAssignModalOpen && (
+          {/* Referral lookup error modal */}
+          {referralErrorModal && (
             <>
-              <ModalBackdrop onClick={() => setIsAssignModalOpen(false)} />
+              <ModalBackdrop onClick={() => setReferralErrorModal(null)} />
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in">
                 <div className="bg-white rounded-2xl border border-appleGray-200 shadow-medium w-full max-w-md">
                   <div className="border-b border-appleGray-100 px-6 py-4 flex items-center justify-between">
                     <h2 className="text-base font-bold text-appleGray-900">
-                      Assign Staff Member
+                      Referral code not found
                     </h2>
                     <button
-                      onClick={() => setIsAssignModalOpen(false)}
+                      type="button"
+                      onClick={() => setReferralErrorModal(null)}
                       className="w-8 h-8 bg-appleGray-100 hover:bg-appleGray-200 rounded-xl flex items-center justify-center transition-colors duration-200"
                     >
                       <Icon icon="material-symbols:close" className="text-lg text-appleGray-500" />
                     </button>
                   </div>
-
                   <div className="p-6">
-                    <div className="mb-5">
-                      <div className="flex items-center gap-3 mb-4 p-3 bg-appleGray-50 rounded-xl border border-appleGray-100">
-                        <div className="w-9 h-9 bg-gradient-to-br from-sky-400 to-blue-500 rounded-lg flex items-center justify-center shrink-0">
-                          <Icon icon="material-symbols:person" className="text-white text-base" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-appleGray-900">
-                            {studentToAssign?.PersonalInformation?.FirstName}{" "}
-                            {studentToAssign?.PersonalInformation?.LastName}
-                          </div>
-                          <div className="text-xs text-appleGray-400">
-                            {studentToAssign?.ContactInformation?.Email}
-                          </div>
-                        </div>
+                    <div className="text-center mb-5">
+                      <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-amber-100">
+                        <Icon icon="material-symbols:confirmation-number" className="text-xl text-amber-600" />
                       </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-appleGray-500 uppercase tracking-wider mb-2">
-                          Select Staff Member
-                        </label>
-                        <select
-                          value={selectedStaffId}
-                          onChange={(e) => setSelectedStaffId(e.target.value)}
-                          className="w-full px-3 py-2.5 bg-appleGray-50 border border-appleGray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 text-sm"
-                        >
-                          <option value="">Choose staff member...</option>
-                          {(() => {
-                            console.log("🔍 Rendering staff members:", staffMembers);
-                            return staffMembers.map((staff) => (
-                              <option key={staff.id} value={staff.id}>
-                                {staff.first_name} {staff.last_name} -{" "}
-                                {staff.role}
-                                {staff.department && ` (${staff.department})`}
-                              </option>
-                            ));
-                          })()}
-                        </select>
-                        {staffMembers.length === 0 && (
-                          <p className="text-xs text-red-500 mt-2">
-                            No staff members available. Check console for errors.
-                          </p>
-                        )}
-                      </div>
+                      {referralErrorModal.code && (
+                        <p className="text-sm font-mono font-semibold text-appleGray-800 mb-2">
+                          {referralErrorModal.code}
+                        </p>
+                      )}
+                      <p className="text-sm text-appleGray-600">
+                        {referralErrorModal.message}
+                      </p>
                     </div>
-
-                    <div className="flex gap-2.5">
-                      <button
-                        onClick={assignStudent}
-                        disabled={!selectedStaffId}
-                        className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:bg-appleGray-200 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
-                      >
-                        Assign Student
-                      </button>
-                      <button
-                        onClick={() => setIsAssignModalOpen(false)}
-                        className="flex-1 bg-appleGray-100 hover:bg-appleGray-200 text-appleGray-700 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setReferralErrorModal(null)}
+                      className="w-full bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
+                    >
+                      OK
+                    </button>
                   </div>
                 </div>
               </div>

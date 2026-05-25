@@ -44,7 +44,26 @@ export const ADMIN_NAV_ITEMS = [
     icon: "material-symbols:public",
     match: (path) => path.startsWith("/admin/german-life"),
   },
+  {
+    href: "/admin/admins",
+    label: "Admin management",
+    icon: "material-symbols:admin-panel-settings-outline",
+    requiresCanManageAdmins: true,
+    match: (path) => path.startsWith("/admin/admins"),
+  },
 ];
+
+export function canManageAdmins(admin) {
+  if (!admin) return false;
+  if (admin.role === "super_admin") return true;
+  if (admin.permissions) {
+    return (
+      admin.permissions.can_manage_admins ||
+      (admin.permissions["admin.create"] && admin.permissions["admin.update"])
+    );
+  }
+  return admin.role === "admin";
+}
 
 export function getAdminPageTitle(pathname) {
   const item = ADMIN_NAV_ITEMS.find((nav) => nav.match(pathname));
@@ -52,7 +71,6 @@ export function getAdminPageTitle(pathname) {
 
   if (pathname.startsWith("/admin/entries")) return "Entries";
   if (pathname.startsWith("/admin/messages")) return "Messages";
-  if (pathname.startsWith("/admin/admins")) return "Admin management";
 
   return "Admin";
 }

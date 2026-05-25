@@ -8,9 +8,13 @@ import AdminTopNav from "./components/AdminTopNav";
 const MESSAGES_FULLSCREEN =
   /^\/admin\/messages(\/|$)/;
 
+const GERMAN_LIFE_EDITOR =
+  /^\/admin\/german-life\/(new|[^/]+\/edit)(\/|$)/;
+
 export default function AdminLayout({ children }) {
   const pathname = usePathname() ?? "";
   const fullscreenMessages = MESSAGES_FULLSCREEN.test(pathname);
+  const germanLifeEditor = GERMAN_LIFE_EDITOR.test(pathname);
   const { loading, isAuthenticated } = useAdminAuth();
 
   if (loading) {
@@ -52,7 +56,15 @@ export default function AdminLayout({ children }) {
       <AdminSideNav />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <AdminTopNav />
-        <main className="min-h-0 flex-1 overflow-y-auto admin-main-scroll">{children}</main>
+        <main
+          className={
+            germanLifeEditor
+              ? "min-h-0 flex-1 overflow-hidden"
+              : "min-h-0 flex-1 overflow-y-auto admin-main-scroll"
+          }
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

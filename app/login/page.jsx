@@ -36,7 +36,7 @@ export default function Login() {
           "Already authenticated on mount, redirecting to client portal:",
           user.id
         );
-        router.replace("/client/" + user.id);
+        router.replace("/student/" + user.id);
       }
     };
 
@@ -70,10 +70,10 @@ export default function Login() {
       if (result.success) {
         console.log(
           "Login successful, redirecting to:",
-          "/client/" + result.user.id
+          "/student/" + result.user.id
         );
         // Use replace instead of push to avoid back button issues
-        router.replace("/client/" + result.user.id);
+        router.replace("/student/" + result.user.id);
       } else {
         console.log("Login failed:", result.error);
         setErrorMsg(

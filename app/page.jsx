@@ -1,9 +1,10 @@
 "use client";
-import Image from "next/image";
-import { useRef, useState } from "react";
-import Expertise from "./components/home/expertise";
+import { useState } from "react";
 import Testimonials from "./components/home/testimonials-apple";
-import AppointmentModal from "./client/[id]/components/AppointmentModal";
+import SuccessCarousel from "./components/home/SuccessCarousel";
+import TeamSection from "./components/home/TeamSection";
+import PartnersSection from "./components/home/PartnersSection";
+import AppointmentModal from "./student/[id]/components/AppointmentModal";
 import {
   FaUserShield,
   FaHandshake,
@@ -15,44 +16,21 @@ import {
   FaUniversity,
   FaPassport,
   FaHome,
-  FaLanguage,
-  FaMoneyBillWave,
-  FaUserTie,
-  FaAward,
   FaArrowRight,
   FaPlay,
   FaTimes,
-  FaStop,
-  FaPushed,
-  FaPause,
+  FaChevronDown,
 } from "react-icons/fa";
 import Link from "next/link";
+import { STUDENTS_COUNT } from "@/lib/marketing-stats";
 
 export default function Home() {
   const [showCreateApointement, setShowCreateApointement] = useState(false);
 
-  // inside your component
-  const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handleToggleVideo = () => {
-    if (!videoRef.current) return;
-
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      videoRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  // Define the Modal component inside the same file.
   const Modal = ({ children, onClose }) => {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="relative bg-white p-8 rounded-3xl shadow-large border border-appleGray-200 w-11/12 sm:w-10/12 md:w-8/12 lg:w-6/12 max-w-2xl">
-          {/* Close button */}
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-appleGray-400 hover:text-appleGray-600 hover:bg-appleGray-100 rounded-full transition-all duration-200"
@@ -66,140 +44,100 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-appleGray-50 relative overflow-hidden">
-      {/* Floating Background Elements */}
-      <div className="absolute top-32 left-10 w-20 h-20 bg-sky-400/10 rounded-full animate-float"></div>
-      <div
-        className="absolute top-64 right-16 w-16 h-16 bg-sky-500/15 rounded-2xl animate-float"
-        style={{ animationDelay: "1s" }}
-      ></div>
-      <div
-        className="absolute top-96 left-20 w-12 h-12 bg-sky-600/20 rounded-full animate-float"
-        style={{ animationDelay: "2s" }}
-      ></div>
-      <div
-        className="absolute top-80 right-32 w-8 h-8 bg-sky-400/25 rounded-full animate-float"
-        style={{ animationDelay: "3s" }}
-      ></div>
-      {/* Hero Section - Apple-style with German colors */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-appleGray-50 via-white to-appleGray-100 pt-24 pb-32">
-        <div className="absolute inset-0 bg-gradient-to-r from-sky-500/5 via-transparent to-sky-600/5"></div>
+    <div className="min-h-screen bg-appleGray-50">
+      {/* ── Hero Section ── */}
+      <section className="relative min-h-screen flex flex-col overflow-hidden">
+        {/* Background Video */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src="/german-education-promo.mov"
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
 
-        {/* Additional floating elements for hero section */}
-        <div
-          className="absolute top-20 left-1/4 w-32 h-32 bg-sky-500/5 rounded-full animate-float"
-          style={{ animationDelay: "0.5s" }}
-        ></div>
-        <div
-          className="absolute bottom-20 right-1/4 w-24 h-24 bg-sky-400/8 rounded-2xl animate-float"
-          style={{ animationDelay: "1.5s" }}
-        ></div>
+        {/* Layered Overlay — deep gradient for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
+        {/* Subtle color tint */}
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-900/30 via-transparent to-black/20" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-8 animate-fade-in-up">
-            {/* Badge */}{" "}
-            <div className="inline-flex items-center space-x-2 bg-sky-500/10 text-sky-700 px-6 py-3 rounded-full text-sm font-medium border border-sky-500/20">
-              <FaCrown className="w-4 h-4" />
-              <span>Premium Education Consultancy</span>
-            </div>
-            {/* Main Headline */}
-            <div className="space-y-6">
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-appleGray-800 leading-none tracking-tight">
-                Your Gateway to
-                <span className="block text-gradient">German Excellence</span>
-              </h1>
+        {/* Content */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          {/* Main hero content — vertically centered */}
+          <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+            <div className="text-center max-w-5xl mx-auto space-y-8 animate-fade-in-up">
 
-              <p className="text-xl md:text-2xl text-appleGray-600 max-w-4xl mx-auto leading-relaxed">
-                Empowering Sri Lankan students with seamless pathways to
-                world-class German education. Experience excellence, precision,
-                and success.
-              </p>
-            </div>{" "}
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-              <Link
-                href="/apply-now"
-                className="group bg-sky-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg btn-apple-hover flex items-center space-x-2 shadow-soft hover:bg-sky-600"
-              >
-                <span>Start Your Journey</span>
-                <FaArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white/90 px-5 py-2.5 rounded-full text-sm font-medium border border-white/20 shadow-sm">
+                <FaCrown className="w-3.5 h-3.5 text-sky-300" />
+                <span>Premium Education Consultancy</span>
+              </div>
 
-              <button
-                onClick={() => setShowCreateApointement(true)}
-                className="group bg-appleGray-100 text-appleGray-700 px-8 py-4 rounded-2xl font-semibold text-lg btn-apple-hover flex items-center space-x-2 border border-appleGray-200 hover:border-sky-300 hover:text-sky-600"
-              >
-                <FaPlay className="w-4 h-4" />
-                <span>Schedule a Call</span>
-              </button>
+              {/* Headline */}
+              <div className="space-y-4">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-none tracking-tight">
+                  Your Gateway to
+                  <span className="block mt-2 bg-gradient-to-r from-sky-300 via-sky-400 to-blue-300 bg-clip-text text-transparent">
+                    German Excellence
+                  </span>
+                </h1>
+
+                <p className="text-lg md:text-xl text-white/75 max-w-3xl mx-auto leading-relaxed font-light pt-2">
+                  Empowering Sri Lankan students with seamless pathways to
+                  world-class German education. Experience excellence, precision,
+                  and success.
+                </p>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                <Link
+                  href="/apply-now"
+                  className="group bg-sky-500 hover:bg-sky-400 text-white px-8 py-4 rounded-2xl font-semibold text-base flex items-center gap-2.5 shadow-lg transition-all duration-300 hover:shadow-sky-500/30 hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  <span>Start Your Journey</span>
+                  <FaArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+
+                <button
+                  onClick={() => setShowCreateApointement(true)}
+                  className="group bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-8 py-4 rounded-2xl font-semibold text-base flex items-center gap-2.5 border border-white/25 hover:border-white/40 transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  <FaPlay className="w-3.5 h-3.5" />
+                  <span>Schedule a Call</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Hero Image/Visual */}
-          <div className="mt-20 relative">
-            <div className="relative max-w-4xl mx-auto">
-              <div className="aspect-video rounded-3xl shadow-large overflow-hidden relative">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  src="/german-education-promo.mov"
-                  // loop
-                  playsInline
-                  // muted  // uncomment if you want autoplay muted behavior
-                >
-                  Your browser does not support the video tag.
-                </video>
-                {/* Overlay button */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/30 hover:bg-black/20 transition"
-                  onClick={handleToggleVideo}
-                >
-                  <div className="bg-white/30 backdrop-blur-sm p-4 rounded-full">
-                    {isPlaying ? (
-                      <FaPause className="w-8 h-8 text-white" />
-                    ) : (
-                      <FaPlay className="w-8 h-8 text-white" />
-                    )}
+          {/* Stats strip at the bottom of the hero */}
+          <div className="relative z-10 border-t border-white/10 bg-black/30 backdrop-blur-md">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-3 divide-x divide-white/10">
+              {[
+                { number: "100+", label: "Students Placed" },
+                { number: "50+", label: "Partner Universities" },
+                { number: "99%", label: "Success Rate" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center px-6">
+                  <div className="text-2xl md:text-3xl font-bold text-white">
+                    {stat.number}
+                  </div>
+                  <div className="text-xs md:text-sm text-white/60 mt-0.5 font-medium tracking-wide uppercase">
+                    {stat.label}
                   </div>
                 </div>
-
-                {/* <Image
-                  src="/student-visa.png"
-                  alt="German University Campus - Students studying in modern facilities"
-                  fill
-                  className="object-cover"
-                  priority
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                /> */}
-                {/* <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                  <div className="text-center text-white space-y-4 animate-fade-in-up">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-                      <FaPlay className="w-12 h-12 mx-auto mb-3 animate-pulse cursor-pointer hover:scale-110 transition-transform" />
-                      <h3 className="text-xl font-bold">
-                        Discover German Education
-                      </h3>
-                      <p className="text-sm opacity-90">
-                        Where precision meets opportunity
-                      </p>
-                    </div>
-                  </div>
-                </div> */}
-              </div>
-              {/* Floating Elements */}
-              <div className="absolute -top-4 -left-4 w-24 h-24 bg-sky-400 rounded-full shadow-medium flex items-center justify-center animate-float">
-                <FaUniversity className="w-8 h-8 text-white" />
-              </div>
-              <div
-                className="absolute -bottom-4 -right-4 w-32 h-32 bg-sky-500 rounded-2xl shadow-medium flex items-center justify-center animate-float"
-                style={{ animationDelay: "1s" }}
-              >
-                <FaGlobe className="w-10 h-10 text-white" />
-              </div>
+              ))}
             </div>
           </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40 animate-bounce">
+            <FaChevronDown className="w-4 h-4" />
+          </div>
         </div>
-      </section>{" "}
+      </section>
+
       {/* Trust Indicators - Apple-style with German colors */}
       <section className="py-24 bg-white relative overflow-hidden">
         {/* Floating elements for this section */}
@@ -256,7 +194,7 @@ export default function Home() {
                 icon: FaCheckCircle,
                 title: "Proven Success",
                 description:
-                  "Proven track record with over 1000 successful university placements.",
+                  `Proven track record with over ${STUDENTS_COUNT} successful university placements.`,
                 color: "bg-sky-500",
               },
               {
@@ -298,7 +236,7 @@ export default function Home() {
           {/* Stats */}
           {/* <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { number: "1000+", label: "Students Placed" },
+              { number: "100+", label: "Students Placed" },
               { number: "99%", label: "Success Rate" },
               { number: "50+", label: "Partner Universities" },
             ].map((stat, index) => (
@@ -314,7 +252,9 @@ export default function Home() {
             ))}
           </div> */}
         </div>
-      </section>{" "}
+      </section>
+      
+      <SuccessCarousel />
       {/* Services Section - Apple-style cards */}
       <section className="py-24 bg-appleGray-50 relative overflow-hidden">
         {/* Floating elements for services section */}
@@ -431,7 +371,7 @@ export default function Home() {
                 Ready to Start Your Journey?
               </h3>
               <p className="text-white/90 mb-8 max-w-2xl mx-auto text-lg">
-                Join over 1000 successful students who have achieved their
+                Join over {STUDENTS_COUNT} successful students who have achieved their
                 German education dreams with our comprehensive support.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -449,85 +389,11 @@ export default function Home() {
           </div>
         </div>{" "}
       </section>
-      {/* Expertise Section */}
-      <Expertise /> {/* Additional Services */}
-      <section className="py-24 bg-white relative overflow-hidden">
-        {/* Floating elements for additional services */}
-        <div
-          className="absolute top-20 left-16 w-22 h-22 bg-sky-400/10 rounded-full animate-float"
-          style={{ animationDelay: "2.2s" }}
-        ></div>
-        <div
-          className="absolute bottom-24 right-12 w-26 h-26 bg-sky-500/8 rounded-2xl animate-float"
-          style={{ animationDelay: "3.8s" }}
-        ></div>
-        <div
-          className="absolute top-56 right-20 w-12 h-12 bg-sky-600/18 rounded-full animate-float"
-          style={{ animationDelay: "1.5s" }}
-        ></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-16 animate-fade-in-up">
-            <h2 className="text-4xl lg:text-5xl font-bold text-appleGray-800">
-              Beyond the Basics
-            </h2>
-            <p className="text-xl text-appleGray-600 max-w-3xl mx-auto">
-              Premium services that set us apart and ensure your complete
-              success.
-            </p>
-          </div>
+      <TeamSection />
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: FaLanguage,
-                title: "Language Support",
-                description:
-                  "TestDaF and IELTS preparation with certified instructors.",
-                color: "bg-sky-500",
-              },
-              {
-                icon: FaMoneyBillWave,
-                title: "Scholarship Guidance",
-                description:
-                  "Access to exclusive funding opportunities and financial aid.",
-                color: "bg-sky-400",
-              },
-              {
-                icon: FaUserTie,
-                title: "Career Counseling",
-                description:
-                  "Professional guidance for your career path in Germany.",
-                color: "bg-appleGray-700",
-              },
-              {
-                icon: FaAward,
-                title: "Premium Mentorship",
-                description:
-                  "One-on-one guidance from industry experts and alumni.",
-                color: "bg-sky-500",
-              },
-            ].map((service, index) => (
-              <div
-                key={index}
-                className="text-center p-6 bg-appleGray-50 rounded-2xl border border-appleGray-200 card-apple-hover"
-              >
-                <div
-                  className={`w-12 h-12 mx-auto mb-4 ${service.color} rounded-xl flex items-center justify-center shadow-soft`}
-                >
-                  <service.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-appleGray-800 mb-2">
-                  {service.title}
-                </h3>
-                <p className="text-appleGray-600 text-sm leading-relaxed">
-                  {service.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>{" "}
+      <PartnersSection />
+
       {/* Testimonials Section */}
       <Testimonials /> {/* Contact Section */}
       <section className="py-24 bg-white relative overflow-hidden">

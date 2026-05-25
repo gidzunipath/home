@@ -21,7 +21,7 @@ const isValidUUID = (uuid) => {
 // GET /api/admin-users/[id] - Get specific admin user
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!isValidUUID(id)) {
       return NextResponse.json(
@@ -83,7 +83,7 @@ export async function GET(request, { params }) {
 // PUT /api/admin-users/[id] - Update admin user
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!isValidUUID(id)) {
       return NextResponse.json(
@@ -227,7 +227,7 @@ export async function PUT(request, { params }) {
 // DELETE /api/admin-users/[id] - Delete/deactivate admin user
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!isValidUUID(id)) {
       return NextResponse.json(

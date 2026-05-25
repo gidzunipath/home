@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 function getYoutubeVideoId(url) {
   if (!url || typeof url !== "string") return null;
@@ -16,6 +17,7 @@ function getYoutubeVideoId(url) {
 }
 
 const GidzBuddyChecklistAdmin = () => {
+  const { showWarning, showError, showConfirm } = useAppModal();
   const [checklistItems, setChecklistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState(null);
@@ -56,7 +58,7 @@ const GidzBuddyChecklistAdmin = () => {
 
     // Basic validation
     if (!title || !description) {
-      alert("Please fill in all required fields.");
+      showWarning("Please fill in all required fields.");
       return;
     }
 
@@ -90,18 +92,18 @@ const GidzBuddyChecklistAdmin = () => {
           resetForm();
           setShowAddModal(false);
         } else {
-          alert("Error: " + result.error);
+          showError(result.error);
         }
       } else {
         const textResponse = await response.text();
         console.error("Non-JSON response:", textResponse);
-        alert(
+        showError(
           "Server returned an unexpected response. Check console for details."
         );
       }
     } catch (error) {
       console.error("Error creating checklist item:", error);
-      alert("Error creating checklist item: " + error.message);
+      showError("Error creating checklist item: " + error.message);
     }
   };
 
@@ -111,7 +113,7 @@ const GidzBuddyChecklistAdmin = () => {
 
     // Basic validation
     if (!title || !description) {
-      alert("Please fill in all required fields.");
+      showWarning("Please fill in all required fields.");
       return;
     }
 
@@ -146,26 +148,29 @@ const GidzBuddyChecklistAdmin = () => {
           setShowEditModal(false);
           setCurrentItem(null);
         } else {
-          alert("Error: " + result.error);
+          showError(result.error);
         }
       } else {
         const textResponse = await response.text();
         console.error("Non-JSON response:", textResponse);
-        alert(
+        showError(
           "Server returned an unexpected response. Check console for details."
         );
       }
     } catch (error) {
       console.error("Error updating checklist item:", error);
-      alert("Error updating checklist item: " + error.message);
+      showError("Error updating checklist item: " + error.message);
     }
   };
 
   const handleDeleteItem = async (itemId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this checklist item?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Checklist Item",
+      message: "Are you sure you want to delete this checklist item?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`/api/gidz-buddy-checklist/${itemId}`, {
@@ -178,11 +183,11 @@ const GidzBuddyChecklistAdmin = () => {
         setChecklistItems(checklistItems.filter((item) => item.id !== itemId));
         setViewItem((v) => (v && v.id === itemId ? null : v));
       } else {
-        alert("Error: " + result.error);
+        showError(result.error);
       }
     } catch (error) {
       console.error("Error deleting checklist item:", error);
-      alert("Error deleting checklist item");
+      showError("Error deleting checklist item");
     }
   };
 

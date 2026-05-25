@@ -62,7 +62,7 @@ export default function Applications() {
     const statusMap = {
       Step1: "Documents",
       Step2: "University",
-      Step3: "Visa",
+      Step3: "Blocked Account",
       Step4: "Successful",
     };
     return statusMap[status] || status;
@@ -98,7 +98,7 @@ export default function Applications() {
     { value: "all", label: "All" },
     { value: "Step1", label: "Documents" },
     { value: "Step2", label: "University" },
-    { value: "Step3", label: "Visa" },
+    { value: "Step3", label: "Blocked Account" },
     { value: "Step4", label: "Successful" },
   ];
 

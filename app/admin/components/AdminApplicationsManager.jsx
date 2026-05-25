@@ -5,6 +5,8 @@ import { supabase } from "../../../lib/supabase";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { useAuthSystem, AUTH_TYPES } from "../../../hooks/useAuthSystem";
+import { generateReferralCode } from "../../../lib/referralCode";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 // A reusable backdrop for modals
 const ModalBackdrop = ({ onClick }) => (
@@ -28,8 +30,8 @@ const CreateApplicationModal = ({ onClose, onCreate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onCreate(formData);
-    // Clear form after submission
+    const referral_code = generateReferralCode(formData.first_name, new Date());
+    onCreate({ ...formData, referral_code });
     setFormData({
       first_name: "",
       last_name: "",
@@ -177,7 +179,7 @@ const CreateApplicationModal = ({ onClose, onCreate }) => {
               >
                 <option value="Step1">Documents</option>
                 <option value="Step2">University</option>
-                <option value="Step3">Visa</option>
+                <option value="Step3">Blocked Account</option>
                 <option value="Step4">Successful</option>
               </select>
             </div>
@@ -358,7 +360,7 @@ const EditApplicationModal = ({ application, onClose, onUpdate }) => {
               >
                 <option value="Step1">University Documents</option>
                 <option value="Step2">University</option>
-                <option value="Step3">Visa Documents</option>
+                <option value="Step3">Blocked Account</option>
                 <option value="Step4">Visa</option>
                 <option value="Step5">Visa Appointment</option>
                 <option value="Step6">Successful</option>
@@ -413,19 +415,21 @@ const ChangeStatusModal = ({ application, onClose, onChangeStatus }) => {
     },
     {
       value: "Step3",
-      label: "Visa Documents",
+      label: "Blocked Account",
       color: "bg-orange-100 text-orange-700",
       icon: "material-symbols:description",
     },
     {
       value: "Step4",
       label: "Visa",
+      hint: "Unlock visa tab in Student Portal",
       color: "bg-red-100 text-red-700",
       icon: "material-symbols:passport",
     },
     {
       value: "Step5",
       label: "Visa Appointment",
+      hint: "Unlock german life tab in Student Portal",
       color: "bg-yellow-100 text-yellow-700",
       icon: "material-symbols:event",
     },
@@ -508,11 +512,18 @@ const ChangeStatusModal = ({ application, onClose, onChangeStatus }) => {
                       />
                       <Icon
                         icon={option.icon}
-                        className="text-xl text-appleGray-600"
+                        className="text-xl text-appleGray-600 shrink-0"
                       />
-                      <span className="font-medium text-appleGray-800">
-                        {option.label}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-appleGray-800">
+                          {option.label}
+                        </span>
+                        {option.hint && (
+                          <p className="text-xs text-appleGray-500 mt-0.5">
+                            {option.hint}
+                          </p>
+                        )}
+                      </div>
                       {newStatus === option.value && (
                         <Icon
                           icon="material-symbols:check-circle"
@@ -554,7 +565,7 @@ const getStatusLabel = (status) => {
   const statusMap = {
     Step1: "University Documents",
     Step2: "University",
-    Step3: "Visa Documents",
+    Step3: "Blocked Account",
     Step4: "Visa",
     Step5: "Visa Appointment",
     Step6: "Successful",
@@ -566,10 +577,10 @@ const AdminApplicationsManager = () => {
   // All hooks must be called at the top level, before any conditional logic
   const router = useRouter();
   const { type, isAuthenticated, loading } = useAuthSystem();
+  const { showSuccess, showError, showConfirm } = useAppModal();
 
   // State hooks - must be declared before any conditional returns
   const [applications, setApplications] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editApplication, setEditApplication] = useState(null);
@@ -579,6 +590,7 @@ const AdminApplicationsManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentStep, setCurrentStep] = useState("all");
   const [loadingStatusId, setLoadingStatusId] = useState(null);
+  const [updatingCodes, setUpdatingCodes] = useState(false);
   const [dashboardStats, setDashboardStats] = useState({
     totalApplications: 0,
     activeApplications: 0,
@@ -690,10 +702,13 @@ const AdminApplicationsManager = () => {
 
   // Delete
   const handleDeleteApplication = async (id) => {
-    const confirmation = window.confirm(
-      "Are you sure you want to delete this application?"
-    );
-    if (!confirmation) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete Application",
+      message: "Are you sure you want to delete this application?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     // Now delete the application
     const { error: applicationError } = await supabase
@@ -709,11 +724,8 @@ const AdminApplicationsManager = () => {
     }
   };
 
-  // Handle card click
-  const handleSelect = (id) => {
-    setSelectedUserId((prevId) => (prevId === id ? null : id));
-    // Open detail in a new tab (optional)
-    router.push("/admin/application/" + id);
+  const handleOpenApplication = (id) => {
+    router.push(`/admin/application/${id}`);
   };
 
   // Open "Create" modal
@@ -739,6 +751,39 @@ const AdminApplicationsManager = () => {
     fetchUsers(currentStep, searchTerm);
   };
 
+  // Backfill / regenerate all referral codes
+  const handleRegenerateReferralCodes = async () => {
+    const confirmed = await showConfirm({
+      type: "warning",
+      title: "Regenerate Referral Codes",
+      message:
+        "This will regenerate referral codes for ALL existing applications using the new format (e.g. JOH60523). Continue?",
+      confirmLabel: "Continue",
+    });
+    if (!confirmed) return;
+
+    setUpdatingCodes(true);
+    try {
+      const res = await fetch("/api/admin/update-referral-codes", {
+        method: "POST",
+      });
+      const result = await res.json();
+      if (result.success) {
+        await showSuccess(
+          `Done! Updated ${result.updated} referral code${result.updated !== 1 ? "s" : ""}.${result.failed > 0 ? ` (${result.failed} failed)` : ""}`
+        );
+        await fetchUsers(currentStep, searchTerm);
+      } else {
+        await showError(result.error);
+      }
+    } catch (err) {
+      await showError("Failed to update referral codes. Please try again.");
+      console.error(err);
+    } finally {
+      setUpdatingCodes(false);
+    }
+  };
+
   // Handle status change
   const handleChangeStatus = async (newStatus) => {
     if (!currentChangingApplication) return;
@@ -750,7 +795,7 @@ const AdminApplicationsManager = () => {
       .eq("id", currentChangingApplication.id);
     if (error) {
       console.error("Error updating status:", error.message);
-      alert("Failed to update status. Please try again.");
+      await showError("Failed to update status. Please try again.");
     } else {
       // Optionally, you can show a success message
       // Refresh the list
@@ -764,7 +809,7 @@ const AdminApplicationsManager = () => {
     { value: "all", label: "All" },
     { value: "Step1", label: "University Documents" },
     { value: "Step2", label: "University" },
-    { value: "Step3", label: "Visa Documents" },
+    { value: "Step3", label: "Blocked Account" },
     { value: "Step4", label: "Visa" },
     { value: "Step5", label: "Visa Appointment" },
     { value: "Step6", label: "Successful" },
@@ -868,6 +913,17 @@ const AdminApplicationsManager = () => {
                 <Icon icon="material-symbols:add" className="text-lg" />
                 <span>New Application</span>
               </button>
+              <button
+                onClick={handleRegenerateReferralCodes}
+                disabled={updatingCodes}
+                className="px-4 py-2 bg-violet-500 hover:bg-violet-600 disabled:bg-appleGray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-1.5"
+              >
+                <Icon
+                  icon={updatingCodes ? "material-symbols:sync" : "material-symbols:confirmation-number"}
+                  className={`text-lg ${updatingCodes ? "animate-spin" : ""}`}
+                />
+                <span>{updatingCodes ? "Updating…" : "Regenerate Referral Codes"}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -880,20 +936,33 @@ const AdminApplicationsManager = () => {
               {applications.map((application) => (
                 <div
                   key={application.id}
-                  className="bg-white rounded-2xl border border-appleGray-200 overflow-hidden hover:shadow-soft transition-all duration-200"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleOpenApplication(application.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleOpenApplication(application.id);
+                    }
+                  }}
+                  className="bg-white rounded-2xl border border-appleGray-200 overflow-hidden hover:shadow-soft transition-all duration-200 cursor-pointer"
                 >
                   <div className="p-4">
-                    <UserCard
-                      application={application}
-                      isSelected={selectedUserId === application.id}
-                      onSelect={handleSelect}
-                    />
+                    <UserCard application={application} />
 
                     {/* Status Badge */}
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-appleGray-100">
                       <div className="space-y-1">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-appleGray-400">
-                          Current Status
+                          Referral Code
+                        </p>
+                        <p className="text-sm font-mono font-semibold text-sky-600 tracking-wider">
+                          {application.referral_code || "—"}
+                        </p>
+                      </div>
+                      <div className="space-y-1 text-right">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-appleGray-400">
+                          Status
                         </p>
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -916,7 +985,10 @@ const AdminApplicationsManager = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-1.5 mt-3">
+                    <div
+                      className="flex flex-wrap gap-1.5 mt-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         onClick={() => openEditModal(application)}
                         className="flex-1 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-100 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5"
@@ -983,9 +1055,16 @@ const AdminApplicationsManager = () => {
                     {applications.map((application) => (
                       <tr
                         key={application.id}
-                        className={`border-b border-appleGray-100 last:border-b-0 hover:bg-appleGray-50 transition-colors duration-150 ${
-                          selectedUserId === application.id ? "bg-sky-50/60" : ""
-                        }`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleOpenApplication(application.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleOpenApplication(application.id);
+                          }
+                        }}
+                        className="border-b border-appleGray-100 last:border-b-0 hover:bg-appleGray-50 transition-colors duration-150 cursor-pointer"
                       >
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-3">
@@ -999,8 +1078,8 @@ const AdminApplicationsManager = () => {
                               <div className="text-sm font-semibold text-appleGray-900">
                                 {application.first_name} {application.last_name}
                               </div>
-                              <div className="text-xs text-appleGray-400 font-mono">
-                                #{application.id}
+                              <div className="text-xs text-sky-600 font-mono font-semibold tracking-wider">
+                                {application.referral_code || "—"}
                               </div>
                             </div>
                           </div>
@@ -1034,10 +1113,13 @@ const AdminApplicationsManager = () => {
                             {getStatusLabel(application.status)}
                           </span>
                         </td>
-                        <td className="px-5 py-3.5">
+                        <td
+                          className="px-5 py-3.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex items-center gap-1.5">
                             <button
-                              onClick={() => handleSelect(application.id)}
+                              onClick={() => handleOpenApplication(application.id)}
                               className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition-all duration-200 border border-sky-100"
                               title="View Details"
                             >

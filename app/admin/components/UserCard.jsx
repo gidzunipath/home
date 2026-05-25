@@ -6,10 +6,10 @@ import { Icon } from "@iconify/react";
 const UserCard = ({ application, isSelected, onSelect }) => {
   return (
     <div
-      onClick={() => onSelect(application?.id)}
-      className={`cursor-pointer transition-all duration-200 ${
-        isSelected ? "ring-2 ring-sky-500 bg-sky-50" : "hover:bg-appleGray-50"
-      }`}
+      onClick={onSelect ? () => onSelect(application?.id) : undefined}
+      className={`transition-all duration-200 ${
+        onSelect ? "cursor-pointer" : ""
+      } ${isSelected ? "ring-2 ring-sky-500 bg-sky-50" : onSelect ? "hover:bg-appleGray-50" : ""}`}
     >
       {/* User Header */}
       <div className="flex items-center space-x-3 mb-4">

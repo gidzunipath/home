@@ -1,43 +1,41 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
 
-function sortMessagesAsc(messages) {
-  if (!messages?.length) return [];
-  return [...messages].sort(
-    (a, b) => new Date(a.created_at) - new Date(b.created_at)
-  );
-}
-
-export function countUnansweredConversations(applications) {
-  if (!applications?.length) return 0;
-
-  return applications.filter((app) => {
-    const messages = sortMessagesAsc(app.messages);
-    const last = messages[messages.length - 1];
-    return last && last.sent_by !== "Gidz";
-  }).length;
-}
+export { countUnansweredConversations, sortMessagesAsc } from "../lib/adminNavCounts";
 
 export function useAdminNavCounts() {
   const [unansweredMessages, setUnansweredMessages] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchCounts = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("applications")
-      .select("id, messages(sent_by, created_at)")
-      .in("status", ["Step1", "Step2", "Step3"])
-      .not("messages", "is", null);
+    try {
+      const res = await fetch("/api/admin/nav-counts", {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-    if (error) {
-      console.error("Error fetching message counts:", error);
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json.success) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn(
+            "Admin nav counts unavailable:",
+            json.error || res.statusText || res.status
+          );
+        }
+        setUnansweredMessages(0);
+      } else {
+        setUnansweredMessages(json.unansweredMessages ?? 0);
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Admin nav counts fetch failed:", err?.message || err);
+      }
       setUnansweredMessages(0);
-    } else {
-      setUnansweredMessages(countUnansweredConversations(data));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {

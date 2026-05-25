@@ -40,13 +40,13 @@ const EntriesPage = () => {
           const data = await response.json();
           if (data.success) {
             setCurrentUser(data.admin);
+            return;
           }
         }
       } catch (error) {
         console.error("Error fetching current user:", error);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     getCurrentUser();
@@ -111,6 +111,8 @@ const EntriesPage = () => {
         }
       } catch (error) {
         console.error("Error fetching application stats:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -148,28 +150,42 @@ const EntriesPage = () => {
               </div>
 
               {/* Statistics Panel */}
-              {!isLoading && (
-                <div className="flex items-center gap-3">
-                  <div className="bg-appleGray-50 border border-appleGray-200 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
-                    <div className="text-lg font-bold text-appleGray-900">
-                      {Steps.find((s) => s.value === currentStep)?.stats.total || 0}
+              <div className="flex items-center gap-3">
+                {isLoading ? (
+                  <>
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="bg-appleGray-50 border border-appleGray-200 rounded-xl px-4 py-2.5 text-center min-w-[80px] animate-pulse"
+                      >
+                        <div className="h-6 w-8 bg-appleGray-200 rounded mx-auto mb-1" />
+                        <div className="h-3 w-10 bg-appleGray-200 rounded mx-auto" />
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <div className="bg-appleGray-50 border border-appleGray-200 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                      <div className="text-lg font-bold text-appleGray-900">
+                        {Steps.find((s) => s.value === currentStep)?.stats.total || 0}
+                      </div>
+                      <div className="text-[11px] font-semibold uppercase tracking-wide text-appleGray-400">Total</div>
                     </div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wide text-appleGray-400">Total</div>
-                  </div>
-                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
-                    <div className="text-lg font-bold text-emerald-700">
-                      {Steps.find((s) => s.value === currentStep)?.stats.read || 0}
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                      <div className="text-lg font-bold text-emerald-700">
+                        {Steps.find((s) => s.value === currentStep)?.stats.read || 0}
+                      </div>
+                      <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-500">Read</div>
                     </div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-500">Read</div>
-                  </div>
-                  <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
-                    <div className="text-lg font-bold text-amber-700">
-                      {Steps.find((s) => s.value === currentStep)?.stats.unread || 0}
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-center min-w-[80px]">
+                      <div className="text-lg font-bold text-amber-700">
+                        {Steps.find((s) => s.value === currentStep)?.stats.unread || 0}
+                      </div>
+                      <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-500">Unread</div>
                     </div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-500">Unread</div>
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

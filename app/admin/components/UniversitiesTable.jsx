@@ -8,6 +8,7 @@ import {
   normalizeUniversityStatus,
   getUniversityStatusLabel,
 } from "../../../lib/university-status";
+import { useAppModal } from "../../../hooks/useAppModal";
 
 function universityStatusIconName(status) {
   const v = normalizeUniversityStatus(status);
@@ -46,6 +47,7 @@ function universityStatusBadgeClass(status) {
 }
 
 const UniversitiesTable = ({ applicationId }) => {
+  const { showWarning, showError, showConfirm } = useAppModal();
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -89,7 +91,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     // Basic validation
     if (!uni_name || !course || !place || !language || !deadline || !status) {
-      alert("Please fill in all fields.");
+      showWarning("Please fill in all fields.");
       return;
     }
 
@@ -136,10 +138,13 @@ const UniversitiesTable = ({ applicationId }) => {
 
   // Handle Delete University
   const handleDeleteUniversity = async (uniId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this university?"
-    );
-    if (!confirmDelete) return;
+    const confirmed = await showConfirm({
+      type: "danger",
+      title: "Delete University",
+      message: "Are you sure you want to delete this university?",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
 
     const { error } = await supabase
       .from("universities")
@@ -148,7 +153,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     if (error) {
       console.error("Error deleting university:", error.message);
-      alert("Failed to delete university. Please try again.");
+      showError("Failed to delete university. Please try again.");
     } else {
       // Update local state
       setUniversities(universities.filter((uni) => uni.id !== uniId));
@@ -161,7 +166,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     // Basic validation
     if (!uni_name || !course || !place || !language || !deadline || !status) {
-      alert("Please fill in all fields.");
+      showWarning("Please fill in all fields.");
       return;
     }
 
@@ -179,7 +184,7 @@ const UniversitiesTable = ({ applicationId }) => {
 
     if (error) {
       console.error("Error updating university:", error.message);
-      alert("Failed to update university. Please try again.");
+      showError("Failed to update university. Please try again.");
     } else {
       // Update local state
       setUniversities(

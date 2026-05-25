@@ -114,14 +114,14 @@ export default function Nav() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
-        isScrolled ? "pt-3" : ""
+        isScrolled ? "pt-3" : "bg-white border-b border-appleGray-200/80"
       }`}
     >
       <div
         className={`mx-auto transition-all duration-500 ease-out ${
           isScrolled
             ? "max-w-5xl px-6 glass-effect shadow-medium backdrop-blur-xl rounded-2xl"
-            : "max-w-7xl px-4 sm:px-6 lg:px-8 bg-transparent"
+            : "max-w-7xl px-4 sm:px-6 lg:px-8 bg-white"
         }`}
       >
         <div className="flex justify-between items-center h-20">
@@ -155,6 +155,13 @@ export default function Nav() {
             >
               Home
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sky-500 transition-all duration-200 group-hover:w-full"></span>{" "}
+            </Link>{" "}
+            <Link
+              href="/programs"
+              className="text-appleGray-700 hover:text-sky-500 font-medium transition-colors duration-200 relative group"
+            >
+              Programs
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sky-500 transition-all duration-200 group-hover:w-full"></span>
             </Link>{" "}
             {/* Visa Dropdown - Show based on auth state */}
             {navConfig.showVisaServices && (
@@ -413,6 +420,13 @@ export default function Nav() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home{" "}
+              </Link>{" "}
+              <Link
+                href="/programs"
+                className="block text-appleGray-700 hover:text-sky-500 font-medium py-2 transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Programs
               </Link>{" "}
               {/* Mobile Visa Dropdown - Show based on auth state */}
               {navConfig.showVisaServices && (

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { STUDENTS_COUNT } from "@/lib/marketing-stats";
+import { OFFICE_BRANCHES } from "@/lib/officeBranches";
 import {
   FaGraduationCap,
   FaEnvelope,
@@ -28,7 +30,7 @@ export default function SiteFooter() {
             <p className="text-appleGray-300 mb-8 leading-relaxed max-w-md text-lg">
               We are Sri Lanka&apos;s premier education consultancy, specializing
               in German university admissions and visa processing. Our expert
-              team has helped over 1000 students achieve their academic dreams in
+              team has helped over {STUDENTS_COUNT} students achieve their academic dreams in
               Germany.
             </p>
             <div className="flex items-center space-x-2 mb-6">
@@ -44,6 +46,17 @@ export default function SiteFooter() {
           <div>
             <h4 className="text-xl font-bold mb-6 text-white">Quick Links</h4>
             <ul className="space-y-4">
+              <li>
+                <Link
+                  href="/programs"
+                  className="text-appleGray-300 hover:text-sky-400 transition-colors duration-300 flex items-center space-x-2 group"
+                >
+                  <span>Programs</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    →
+                  </span>
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/apply-now"
@@ -72,26 +85,30 @@ export default function SiteFooter() {
           <div>
             <h4 className="text-xl font-bold mb-6 text-white">Contact Info</h4>
             <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-soft">
-                  <FaMapMarkerAlt className="w-5 h-5 text-white" />
+              {OFFICE_BRANCHES.map((branch) => (
+                <div key={branch.id} className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-soft">
+                    <FaMapMarkerAlt className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-appleGray-300 font-medium">{branch.name}</p>
+                    {branch.addressLines.map((line) => (
+                      <p key={line} className="text-appleGray-400">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-appleGray-300 font-medium">Ponnalai Road,</p>
-                  <p className="text-appleGray-400">
-                    Sandilipay, 40000, Sri Lanka
-                  </p>
-                </div>
-              </div>
+              ))}
               <div className="flex items-center space-x-4">
                 <div className="w-10 h-10 bg-sky-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-soft">
                   <FaPhone className="w-5 h-5 text-white" />
                 </div>
                 <a
-                  href="tel:+4915566389194"
+                  href="tel:+94741166235"
                   className="text-appleGray-300 hover:text-white transition-colors duration-300"
                 >
-                  +49 155 6638 9194
+                  +94 74 116 6235
                 </a>
               </div>
               <div className="flex items-center space-x-4">
@@ -131,13 +148,13 @@ export default function SiteFooter() {
             <div className="flex items-center space-x-2 text-appleGray-400">
               <span>Developed by</span>
               <a
-                href="https://helarix.com"
+                href="https://lizristech.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-sky-400 hover:text-white transition-colors duration-300 font-bold"
               >
                 <FaCode className="w-4 h-4" />
-                <span>Helarix Technologies</span>
+                <span>Lizris</span>
               </a>
             </div>
           </div>
