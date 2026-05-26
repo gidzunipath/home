@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import {
@@ -2213,4 +2213,18 @@ const StudentApplicationForm = () => {
   }
 };
 
-export default StudentApplicationForm;
+function StudentApplicationFormFallback() {
+  return (
+    <div className="min-h-screen bg-appleGray-50 flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+export default function StudentApplicationPage() {
+  return (
+    <Suspense fallback={<StudentApplicationFormFallback />}>
+      <StudentApplicationForm />
+    </Suspense>
+  );
+}
