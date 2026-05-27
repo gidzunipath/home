@@ -129,8 +129,8 @@ export default function TasksTab({ applicant, visaStepsStatus, onMessageOpen }) 
             Visa Section Locked
           </h3>
           <p className="text-appleGray-600 mb-6">
-            The visa section is currently locked. Please contact your counselor
-            for assistance or complete the required previous steps.
+          You don’t have access to view this section at the moment
+          Once your Admission University is completed, access will be granted.
           </p>
           <button
             onClick={onMessageOpen}
