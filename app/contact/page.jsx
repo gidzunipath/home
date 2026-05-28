@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaTiktok,
   FaInstagram,
@@ -71,6 +71,18 @@ export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [mapsLoaded, setMapsLoaded] = useState({});
+  const [activeBranchId, setActiveBranchId] = useState(
+    OFFICE_BRANCHES[0]?.id ?? ""
+  );
+
+  const activeBranch =
+    OFFICE_BRANCHES.find((branch) => branch.id === activeBranchId) ??
+    OFFICE_BRANCHES[0];
+
+  useEffect(() => {
+    if (!activeBranchId) return;
+    setMapsLoaded((prev) => ({ ...prev, [activeBranchId]: false }));
+  }, [activeBranchId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -187,7 +199,7 @@ export default function ContactPage() {
                   href="tel:+94741166235"
                   className="block text-lg font-semibold text-sky-600 hover:text-sky-700 transition-colors"
                 >
-                  +94 74 116 6235
+                  +94741166235
                 </a>
                 <div className="flex items-center justify-center space-x-2 text-appleGray-500">
                   <FaClock className="w-4 h-4" />
@@ -393,23 +405,65 @@ export default function ContactPage() {
               </div>
             </div>{" "}
             {/* Maps */}
-            <div className="bg-white rounded-3xl p-8 shadow-large animate-fade-in-up space-y-8">
-              <div className="text-center">
+            <div className="bg-white rounded-3xl p-8 shadow-large animate-fade-in-up">
+              <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-appleGray-900 mb-2">
                   Find Us Here
                 </h3>
                 <p className="text-appleGray-600">
-                  Visit our offices for in-person consultation
+                  Select a branch to view its location on the map
                 </p>
               </div>
 
-              {OFFICE_BRANCHES.map((branch) => (
-                <div key={branch.id}>
-                  <h4 className="text-lg font-semibold text-appleGray-900 mb-3 text-center">
-                    {branch.name}
-                  </h4>
+              <div
+                role="tablist"
+                aria-label="Office branch locations"
+                className="flex flex-wrap gap-2 justify-center mb-6"
+              >
+                {OFFICE_BRANCHES.map((branch) => {
+                  const isActive = activeBranchId === branch.id;
+                  const tabLabel = branch.name.replace(" Branch", "");
+
+                  return (
+                    <button
+                      key={branch.id}
+                      type="button"
+                      role="tab"
+                      id={`branch-tab-${branch.id}`}
+                      aria-selected={isActive}
+                      aria-controls={`branch-panel-${branch.id}`}
+                      onClick={() => setActiveBranchId(branch.id)}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 touch-manipulation ${
+                        isActive
+                          ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-soft"
+                          : "bg-appleGray-50 text-appleGray-700 hover:bg-appleGray-100 border border-appleGray-200"
+                      }`}
+                    >
+                      {tabLabel}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {activeBranch && (
+                <div
+                  role="tabpanel"
+                  id={`branch-panel-${activeBranch.id}`}
+                  aria-labelledby={`branch-tab-${activeBranch.id}`}
+                >
+                  <div className="text-center mb-4">
+                    <h4 className="text-lg font-semibold text-appleGray-900">
+                      {activeBranch.name}
+                    </h4>
+                    {activeBranch.addressLines.map((line) => (
+                      <p key={line} className="text-appleGray-600">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+
                   <div className="relative w-full aspect-[4/3] min-h-[240px] sm:min-h-[300px] rounded-2xl overflow-hidden border border-appleGray-100">
-                    {!mapsLoaded[branch.id] && (
+                    {!mapsLoaded[activeBranch.id] && (
                       <div
                         className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-appleGray-50"
                         aria-live="polite"
@@ -422,10 +476,13 @@ export default function ContactPage() {
                       </div>
                     )}
                     <iframe
-                      src={branch.mapEmbedUrl}
-                      title={branch.mapTitle}
+                      key={activeBranch.id}
+                      src={activeBranch.mapEmbedUrl}
+                      title={activeBranch.mapTitle}
                       className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${
-                        mapsLoaded[branch.id] ? "opacity-100" : "opacity-0"
+                        mapsLoaded[activeBranch.id]
+                          ? "opacity-100"
+                          : "opacity-0"
                       }`}
                       style={{ border: 0 }}
                       allowFullScreen
@@ -434,13 +491,13 @@ export default function ContactPage() {
                       onLoad={() =>
                         setMapsLoaded((prev) => ({
                           ...prev,
-                          [branch.id]: true,
+                          [activeBranch.id]: true,
                         }))
                       }
                     />
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

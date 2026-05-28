@@ -55,7 +55,7 @@ const NotificationSystem = ({ notifications = [], onDismiss }) => {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+    <div className="fixed top-4 md:top-24 right-4 z-[90] space-y-2 max-w-sm">
       {visibleNotifications.map((notification) => (
         <div
           key={notification.id}

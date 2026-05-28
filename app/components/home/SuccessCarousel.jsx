@@ -24,7 +24,7 @@ function carouselImageLabel(src) {
   return match ? `Carousel image ${match[1]}` : "Carousel image";
 }
 
-const AUTOPLAY_MS = 5000;
+const AUTOPLAY_MS = 4000;
 const TRANSITION_MS = 600;
 const MOBILE_MEDIA = "(max-width: 639px)";
 

@@ -5,6 +5,14 @@ import { Icon } from "@iconify/react";
 import { supabase } from "../../../lib/supabase";
 import { useAppModal } from "../../../hooks/useAppModal";
 
+/** Display labels for upload_by; DB values remain "Us" / "Client". */
+const UPLOAD_BY_LABELS = {
+  Us: "Visa Document",
+  Client: "Student Document",
+};
+
+const getUploadByLabel = (value) => UPLOAD_BY_LABELS[value] ?? value;
+
 const DocumentsFromUs = ({ applicationId }) => {
   const { showWarning, showError, showConfirm } = useAppModal();
   const [documents, setDocuments] = useState([]);
@@ -373,7 +381,7 @@ const DocumentsFromUs = ({ applicationId }) => {
                     <td className="py-4 px-6">
                       <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">
                         <Icon icon="mdi:account-check" className="text-sm" />
-                        {doc.upload_by}
+                        {getUploadByLabel(doc.upload_by)}
                       </span>
                     </td>
                     <td className="py-4 px-6">
@@ -477,8 +485,8 @@ const DocumentsFromUs = ({ applicationId }) => {
                   }
                   className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                 >
-                  <option value="Us">Us</option>
-                  <option value="Client">Client</option>
+                  <option value="Us">{UPLOAD_BY_LABELS.Us}</option>
+                  <option value="Client">{UPLOAD_BY_LABELS.Client}</option>
                 </select>
               </div>
               <div>
@@ -575,8 +583,8 @@ const DocumentsFromUs = ({ applicationId }) => {
                   }
                   className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                 >
-                  <option value="Us">Us</option>
-                  <option value="Client">Client</option>
+                  <option value="Us">{UPLOAD_BY_LABELS.Us}</option>
+                  <option value="Client">{UPLOAD_BY_LABELS.Client}</option>
                 </select>
               </div>
               <div>

@@ -29,6 +29,7 @@ function getSupabaseImageRemotePatterns() {
 }
 
 const nextConfig = {
+  allowedDevOrigins: ["192.168.8.149"],
   async redirects() {
     return [
       {

@@ -18,7 +18,6 @@ import {
 } from "react-icons/fa";
 import VerticalStepper from "../VerticalStepper";
 import {
-  canAccessVisaSection,
   getApplicationStepNumber,
   getJourneyFocusLabel,
 } from "../../../../../lib/application-status";
@@ -32,7 +31,6 @@ export default function OverviewTab({
 }) {
   const [openFaq, setOpenFaq] = useState(null);
   const statusStep = getApplicationStepNumber(applicant?.status);
-  const showVisaJourney = canAccessVisaSection(applicant?.status);
 
   return (
     <div className="p-6 sm:p-8 space-y-8">
@@ -43,25 +41,40 @@ export default function OverviewTab({
           Application Progress
         </h3>
         <div className="bg-gradient-to-r from-sky-500/10 to-sky-600/10 p-6 rounded-2xl">
-          <VerticalStepper
-            currentStep={statusStep}
-            maxStep={showVisaJourney ? undefined : 3}
-          />
+          <VerticalStepper currentStep={statusStep} />
         </div>
       </div>
 
       {/* Summary */}
       <div>
-        <h3 className="text-xl font-bold text-appleGray-800 mb-4 flex items-center">
-          <FaChartLine className="w-5 h-5 text-sky-500 mr-3" />
+        <h3 className="text-base md:text-xl font-bold text-appleGray-800 mb-2 md:mb-4 flex items-center">
+          <FaChartLine className="w-4 h-4 md:w-5 md:h-5 text-sky-500 mr-2 md:mr-3" />
           Summary
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Mobile: one row */}
+        <div className="flex gap-2 md:hidden">
+          <div className="flex-1 min-w-0 bg-appleGray-50 p-2.5 rounded-xl">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-appleGray-600">Progress</span>
+              <span className="text-base font-bold text-appleGray-800">
+                {dashboardStats.progressPercentage}%
+              </span>
+            </div>
+          </div>
+          <div className="flex-1 min-w-0 bg-appleGray-50 p-2.5 rounded-xl">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-medium text-appleGray-600 flex-shrink-0">Next</span>
+              <span className="text-xs font-bold text-sky-600 leading-tight text-right truncate">
+                {getJourneyFocusLabel(applicant?.status)}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Desktop: original */}
+        <div className="hidden md:grid md:grid-cols-2 gap-4">
           <div className="bg-appleGray-50 p-4 rounded-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-appleGray-600">
-                Progress
-              </span>
+              <span className="text-sm font-medium text-appleGray-600">Progress</span>
               <span className="text-lg font-bold text-appleGray-800">
                 {dashboardStats.progressPercentage}%
               </span>
@@ -69,9 +82,7 @@ export default function OverviewTab({
           </div>
           <div className="bg-appleGray-50 p-4 rounded-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-appleGray-600">
-                Next Step
-              </span>
+              <span className="text-sm font-medium text-appleGray-600">Next Step</span>
               <span className="text-sm font-bold text-sky-600">
                 {getJourneyFocusLabel(applicant?.status)}
               </span>
@@ -301,7 +312,7 @@ export default function OverviewTab({
                     className="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 min-h-[44px] w-full sm:w-auto"
                   >
                     <FaPhone className="w-4 h-4 hidden md:inline" />
-                    <span>WhatsApp: +94 74 116 6235</span>
+                    <span>WhatsApp: +94741166235</span>
                   </a>
                   <a
                     href="mailto:gidzunipath@gmail.com"

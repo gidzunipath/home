@@ -215,84 +215,62 @@ const DocumentsToUpload = ({ applicationId }) => {
     (doc) => doc.url && doc.upload_by === "Client"
   );
 
-  // Component for rendering documents table
-  const DocumentsTable = ({ docs, showActions = false }) => (
-    <div className="bg-white border border-appleGray-200 rounded-2xl overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-appleGray-50 border-b border-appleGray-200">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-appleGray-700">
-                Name
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-appleGray-700">
-                Uploaded
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-appleGray-700">
-                Category
-              </th>
-              <th className="text-right px-4 py-3 text-sm font-semibold text-appleGray-700">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-appleGray-100">
-            {docs.map((doc) => (
-              <tr
-                key={doc.id}
-                className="hover:bg-appleGray-50 transition-colors duration-200"
-              >
-                <td className="px-4 py-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FaFilePdf className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-sm font-medium text-appleGray-800 truncate max-w-[200px]">
-                      {doc.name}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm text-appleGray-600">
+  const DocumentsCards = ({ docs, showActions = false }) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {docs.map((doc) => (
+        <div
+          key={doc.id}
+          className="bg-white border border-appleGray-200 rounded-2xl p-4 flex flex-col"
+        >
+          <div className="flex items-start gap-3 flex-1">
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <FaFilePdf className="w-5 h-5 text-red-500" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-appleGray-800 break-words">
+                {doc.name}
+              </p>
+              <div className="mt-2 space-y-1 text-xs text-appleGray-600">
+                <p>
+                  <span className="font-medium text-appleGray-700">Uploaded:</span>{" "}
                   {formatDate(doc.created_at)}
-                </td>
-                <td className="px-4 py-3 text-sm text-appleGray-600">
+                </p>
+                <p>
+                  <span className="font-medium text-appleGray-700">Category:</span>{" "}
                   {doc.category || "-"}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-end space-x-2">
-                    {doc.url && (
-                      <>
-                        <a
-                          href={doc.url}
-                          download
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-lg transition-colors duration-200"
-                        >
-                          <FaDownload className="w-3 h-3" />
-                          <span>Download</span>
-                        </a>
-                      </>
-                    )}
-                    {showActions && (
-                      <button
-                        onClick={() => handleDelete(doc)}
-                        disabled={deleting === doc.id}
-                        className="inline-flex items-center space-x-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50"
-                      >
-                        {deleting === doc.id ? (
-                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <FaTrash className="w-3 h-3" />
-                        )}
-                        <span>Delete</span>
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-col sm:flex-row gap-2">
+            {doc.url && (
+              <a
+                href={doc.url}
+                download
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-xl transition-colors duration-200"
+              >
+                <FaDownload className="w-4 h-4" />
+                <span>Download</span>
+              </a>
+            )}
+            {showActions && (
+              <button
+                onClick={() => handleDelete(doc)}
+                disabled={deleting === doc.id}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-xl transition-colors duration-200 disabled:opacity-50"
+              >
+                {deleting === doc.id ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <FaTrash className="w-4 h-4" />
+                )}
+                <span>Delete</span>
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 
@@ -349,7 +327,7 @@ const DocumentsToUpload = ({ applicationId }) => {
                 </p>
               </div>
             ) : (
-              <DocumentsTable docs={clientDocuments} showActions={true} />
+              <DocumentsCards docs={clientDocuments} showActions={true} />
             )}
           </>
         )}

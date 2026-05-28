@@ -51,14 +51,14 @@ const CATEGORIES = [
     title: "Social Sciences & Humanities",
     description:
       "Study Psychology, Sociology, Political Science, International Relations, Philosophy, Media Studies, and History at leading German universities. These programs help students build analytical, communication, and global understanding skills for international careers.",
-    image: "/programs/bachelors/socialScience.png",
+    image: "/programs/bachelors/socialscience.png",
     imageAlt: "Social Sciences & Humanities",
   },
   {
     title: "Law & Public Administration",
     description:
       "Choose from programs in Law, European Studies, International Law, Public Administration, and Governance Studies. German universities provide strong legal and public policy education with international perspectives and modern academic environments.",
-    image: "/programs/bachelors/Law.png",
+    image: "/programs/bachelors/law.png",
     imageAlt: "Law & Public Administration",
   },
   {

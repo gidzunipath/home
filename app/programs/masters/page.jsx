@@ -72,7 +72,7 @@ const CATEGORIES = [
     title: "Law & Public Administration",
     description:
       "Study International Law, European Law, Public Policy, Governance, Human Rights, and Public Administration. German universities offer high-quality legal education with strong international and European perspectives.",
-    image: "/programs/masters/Law%20.png",
+    image: "/programs/masters/Law.png",
     imageAlt: "Law & Public Administration",
   },
 ];

@@ -83,7 +83,7 @@ export default function SupportTab({ onMessageOpen, onAppointmentOpen }) {
               href="tel:+94741166235"
               className="block text-base font-semibold text-sky-600 hover:text-sky-700 transition-colors mb-2"
             >
-              +94 74 116 6235
+              +94741166235
             </a>
             <div className="flex items-center justify-center space-x-2 text-appleGray-400">
               <FaClock className="w-3.5 h-3.5" />

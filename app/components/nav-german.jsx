@@ -38,17 +38,23 @@ export default function Nav() {
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setIsMobileMenuOpen((prev) => !prev);
   };
 
   // Toggle mobile visa dropdown
   const toggleMobileVisa = () => {
-    setIsMobileVisaOpen(!isMobileVisaOpen);
+    setIsMobileVisaOpen((prev) => !prev);
   };
 
   // Toggle mobile admin dropdown
   const toggleMobileAdmin = () => {
-    setIsMobileAdminOpen(!isMobileAdminOpen);
+    setIsMobileAdminOpen((prev) => !prev);
+  };
+
+  const handleToggleWithPointer = (toggleFn) => (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleFn();
   };
 
   // Handle dropdown with delay
@@ -113,7 +119,7 @@ export default function Nav() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+      className={`fixed top-0 left-0 right-0 z-[70] transition-all duration-500 ease-out ${
         isScrolled ? "pt-3" : "bg-white border-b border-appleGray-200/80"
       }`}
     >
@@ -128,7 +134,7 @@ export default function Nav() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             {/* <div className="w-10 h-10 bg-gradient-to-br from-german-red to-german-gold rounded-xl flex items-center justify-center shadow-soft transition-all duration-300 group-hover:scale-110"> */}
-            <button className="flex items-center">
+            <span className="flex items-center">
               <Image
                 width={64}
                 height={64}
@@ -136,7 +142,7 @@ export default function Nav() {
                 alt="Gidzuni Education Pathways Logo"
                 className="h-16 w-16 object-contain"
               />
-            </button>
+            </span>
             {/* </div> */}
             <div className="montserrat text-2xl font-bold text-appleGray-800">
               GIDZ <span className="text-sky-500">UniPath</span>
@@ -398,7 +404,10 @@ export default function Nav() {
 
           {/* Mobile menu button */}
           <button
-            onClick={toggleMobileMenu}
+            onPointerDown={handleToggleWithPointer(toggleMobileMenu)}
+            type="button"
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            style={{ touchAction: "manipulation" }}
             className="lg:hidden p-2 rounded-xl bg-appleGray-100 text-appleGray-700 hover:bg-appleGray-200 transition-colors duration-200"
           >
             {isMobileMenuOpen ? (
@@ -433,7 +442,9 @@ export default function Nav() {
                 <div>
                   {" "}
                   <button
-                    onClick={toggleMobileVisa}
+                    onPointerDown={handleToggleWithPointer(toggleMobileVisa)}
+                    type="button"
+                    style={{ touchAction: "manipulation" }}
                     className="flex items-center justify-between w-full text-appleGray-700 hover:text-sky-500 font-medium py-2 transition-colors duration-200"
                   >
                     <span>Visa Apply</span>
@@ -511,7 +522,9 @@ export default function Nav() {
                     {navConfig.primaryAction.type === "admin-dropdown" ? (
                       <div>
                         <button
-                          onClick={toggleMobileAdmin}
+                          onPointerDown={handleToggleWithPointer(toggleMobileAdmin)}
+                          type="button"
+                          style={{ touchAction: "manipulation" }}
                           className="flex items-center justify-between w-full text-appleGray-700 hover:text-sky-500 font-medium py-2 transition-colors duration-200"
                         >
                           <span>{navConfig.primaryAction.label}</span>
@@ -573,7 +586,9 @@ export default function Nav() {
                 ) : navConfig.primaryAction.type === "admin-dropdown" ? (
                   <div>
                     <button
-                      onClick={toggleMobileAdmin}
+                      onPointerDown={handleToggleWithPointer(toggleMobileAdmin)}
+                      type="button"
+                      style={{ touchAction: "manipulation" }}
                       className="flex items-center justify-between w-full text-appleGray-700 hover:text-sky-500 font-medium py-2 transition-colors duration-200"
                     >
                       <span>{navConfig.primaryAction.label}</span>
