@@ -50,6 +50,11 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/login" className="text-sm text-appleGray-300 hover:text-sky-400 transition-colors duration-200">
+                  Login
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-sm text-appleGray-300 hover:text-sky-400 transition-colors duration-200">
                   Contact Us
                 </Link>
@@ -77,7 +82,7 @@ export default function SiteFooter() {
               <div className="flex items-center gap-2">
                 <FaPhone className="w-3 h-3 text-sky-400 flex-shrink-0" />
                 <a href="tel:+94741166235" className="text-xs text-appleGray-300 hover:text-white transition-colors duration-200">
-                  +94 74 116 6235
+                  +94741166235
                 </a>
               </div>
               <div className="flex items-center gap-2">

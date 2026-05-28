@@ -44,9 +44,9 @@ export default function TabNav({
       visaDocumentsUploaded < Math.floor(visaDocumentsTotal * 0.4));
 
   return (
-    <div className="border-b border-appleGray-200">
-      {/* Mobile — 2/3 column grid */}
-      <nav className="grid grid-cols-2 sm:grid-cols-3 gap-1 p-2 md:hidden">
+    <>
+      {/* Mobile — fixed bottom navigation */}
+      <nav className="fixed bottom-0 inset-x-0 z-40 grid grid-cols-7 gap-1 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] bg-white/95 backdrop-blur-md border-t border-appleGray-200 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] md:hidden">
         {TABS.map((tab) => {
           const isLocked =
             tab.id === "tasks" && applicant?.lock_1 && showVisaTab;
@@ -57,7 +57,7 @@ export default function TabNav({
               key={`mobile-${tab.id}`}
               onClick={() => !isLocked && onTabChange(tab.id)}
               disabled={isLocked}
-              className={`relative flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl text-xs font-medium transition-all duration-200 touch-manipulation ${
+              className={`relative flex flex-col items-center justify-center min-w-0 px-1 py-2 rounded-xl text-[10px] font-medium leading-tight transition-all duration-200 touch-manipulation ${
                 isLocked
                   ? "text-appleGray-400 cursor-not-allowed opacity-50 bg-appleGray-50"
                   : isActive
@@ -65,8 +65,8 @@ export default function TabNav({
                   : "text-appleGray-600 hover:text-appleGray-800 hover:bg-appleGray-50"
               }`}
             >
-              <tab.icon className="w-4 h-4 sm:w-5 sm:h-5 mb-1" />
-              <span className="text-center leading-tight">{tab.label}</span>
+              <tab.icon className="w-4 h-4 mb-1 shrink-0" />
+              <span className="text-center truncate w-full">{tab.label}</span>
               {tab.id === "tasks" && visaUrgent && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                   !
@@ -83,7 +83,8 @@ export default function TabNav({
       </nav>
 
       {/* Desktop — horizontal scroll */}
-      <nav className="hidden md:flex overflow-x-auto">
+      <div className="hidden md:block border-b border-appleGray-200">
+        <nav className="hidden md:flex overflow-x-auto">
         {TABS.map((tab) => {
           const isLocked =
             tab.id === "tasks" && applicant?.lock_1 && showVisaTab;
@@ -117,7 +118,8 @@ export default function TabNav({
             </button>
           );
         })}
-      </nav>
-    </div>
+        </nav>
+      </div>
+    </>
   );
 }

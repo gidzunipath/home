@@ -444,7 +444,7 @@ const ApplicantDetail = () => {
                                                 <span style="color: white; font-size: 14px;">📞</span>
                                             </div>
                                             <div>
-                                                <p style="margin: 0; color: #1f2937; font-weight: 600;">+94 74 116 6235</p>
+                                                <p style="margin: 0; color: #1f2937; font-weight: 600;">+94741166235</p>
                                                 <p style="margin: 2px 0 0 0; color: #6b7280; font-size: 13px;">Monday to Friday, 9:30 AM - 5:00 PM</p>
                                             </div>
                                         </div>

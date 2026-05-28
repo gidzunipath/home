@@ -396,7 +396,7 @@ const ApplicantDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-appleGray-50 via-white to-sky-50 relative overflow-hidden pt-16 sm:pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-appleGray-50 via-white to-sky-50 relative overflow-hidden pt-3 md:pt-20">
       <NotificationSystem
         notifications={notifications}
         onDismiss={dismissNotification}
@@ -408,7 +408,7 @@ const ApplicantDetail = () => {
       <div className="absolute top-40 right-20 w-24 h-24 bg-sky-500/20 rounded-2xl animate-float pointer-events-none" style={{ animationDelay: "1s" }} />
       <div className="absolute bottom-40 left-20 w-20 h-20 bg-sky-600/15 rounded-full animate-float pointer-events-none" style={{ animationDelay: "2s" }} />
 
-      <div className="relative py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="relative py-3 md:py-8 lg:py-12 px-3 md:px-6 lg:px-8 pb-28 md:pb-8 lg:pb-12">
         <ClientHeader applicant={applicant} />
 
         <DashboardStats applicant={applicant} dashboardStats={dashboardStats} />

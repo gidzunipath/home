@@ -199,7 +199,7 @@ export default function ContactPage() {
                   href="tel:+94741166235"
                   className="block text-lg font-semibold text-sky-600 hover:text-sky-700 transition-colors"
                 >
-                  +94 74 116 6235
+                  +94741166235
                 </a>
                 <div className="flex items-center justify-center space-x-2 text-appleGray-500">
                   <FaClock className="w-4 h-4" />
