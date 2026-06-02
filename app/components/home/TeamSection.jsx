@@ -30,7 +30,7 @@ const TEAM_MEMBERS = [
 function TeamPhoto({ member }) {
   if (member.image) {
     return (
-      <div className="relative aspect-[5/6] w-full overflow-hidden rounded-2xl bg-appleGray-100 shadow-soft">
+      <div className="relative aspect-[2/2] w-full overflow-hidden rounded-2xl bg-appleGray-100 shadow-soft">
         <Image
           src={member.image}
           alt={member.name}

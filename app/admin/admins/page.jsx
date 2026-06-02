@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAdminAuth } from "../../../hooks/useAdminAuth";
 import axios from "axios";
 import { Icon } from "@iconify/react";
+import { emailAssetUrl } from "../../../lib/emailAssets";
 import {
   FaPlus,
   FaEdit,
@@ -194,7 +195,7 @@ export default function AdminManagementPage() {
             <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f4f4f4;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
                     <div style="display: flex; align-items: center; justify-content: center; padding: 20px 0; background-color: #003366; margin-bottom: 30px;">
-                        <img src="/gidz-transperant.png" style="height: 70px; width: auto; margin-right: 10px;" /> 
+                        <img src="${emailAssetUrl("/gidz-transperant.png")}" style="height: 70px; width: auto; margin-right: 10px;" /> 
                         <h1 style="color: #ffffff; margin-left: 10px; font-size: 28px;">Gidz Uni Path</h1>
                     </div>
                     

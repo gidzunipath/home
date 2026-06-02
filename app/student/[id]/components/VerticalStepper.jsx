@@ -7,6 +7,7 @@ import {
   FaTrophy,
   FaCalendarAlt,
   FaGraduationCap,
+  FaComments,
 } from "react-icons/fa";
 
 const DEFAULT_STEPS = [
@@ -42,6 +43,12 @@ const DEFAULT_STEPS = [
     },
     {
       id: 6,
+      title: "Interview",
+      subtitle: "Prepare for your visa interview",
+      icon: FaComments,
+    },
+    {
+      id: 7,
       title: "Successful",
       subtitle: "Journey complete",
       icon: FaTrophy,

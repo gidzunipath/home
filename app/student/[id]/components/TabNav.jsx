@@ -9,7 +9,11 @@ import {
   FaComments,
   FaGlobe,
 } from "react-icons/fa";
-import { canAccessVisaSection } from "../../../../lib/application-status";
+import {
+  canAccessVisaSection,
+  isVisaStageStatus,
+  isVisaTabLocked,
+} from "../../../../lib/application-status";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: FaChartLine },
@@ -30,7 +34,14 @@ export default function TabNav({
   const { universityDocumentsUploaded, universityDocumentsTotal,
     visaDocumentsUploaded, visaDocumentsTotal } = dashboardStats;
 
-  const showVisaTab = canAccessVisaSection(applicant?.status);
+  const showVisaTab = canAccessVisaSection(
+    applicant?.status,
+    applicant?.lock_1
+  );
+  const visaTabLocked = isVisaTabLocked(
+    applicant?.status,
+    applicant?.lock_1
+  );
 
   const visaUrgent =
     showVisaTab &&
@@ -48,8 +59,7 @@ export default function TabNav({
       {/* Mobile — fixed bottom navigation */}
       <nav className="fixed bottom-0 inset-x-0 z-40 grid grid-cols-7 gap-1 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] bg-white/95 backdrop-blur-md border-t border-appleGray-200 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] md:hidden">
         {TABS.map((tab) => {
-          const isLocked =
-            tab.id === "tasks" && applicant?.lock_1 && showVisaTab;
+          const isLocked = tab.id === "tasks" && visaTabLocked;
           const isActive = activeTab === tab.id;
 
           return (
@@ -86,8 +96,7 @@ export default function TabNav({
       <div className="hidden md:block border-b border-appleGray-200">
         <nav className="hidden md:flex overflow-x-auto">
         {TABS.map((tab) => {
-          const isLocked =
-            tab.id === "tasks" && applicant?.lock_1 && showVisaTab;
+          const isLocked = tab.id === "tasks" && visaTabLocked;
           const isActive = activeTab === tab.id;
 
           return (

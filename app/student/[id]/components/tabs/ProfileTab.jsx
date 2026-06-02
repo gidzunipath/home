@@ -53,8 +53,7 @@ export default function ProfileTab({ applicant, applicationId, onFeedbackOpen })
                 Share Your Referral Code
               </h4>
               <p className="text-sm text-appleGray-600">
-                Refer friends and family to earn rewards when they complete
-                their application!
+                Refer friends and family using your referral code and earn €100 once their visa is successfully approved.
               </p>
             </div>
 
@@ -111,7 +110,7 @@ export default function ProfileTab({ applicant, applicationId, onFeedbackOpen })
             </div>
             <div>
               <h4 className="text-xl font-semibold text-appleGray-800 mb-2">
-                Help a Friend Start Their Journey
+              Do you Know Anyone Planing to Study in Germany ?
               </h4>
               <p className="text-sm text-appleGray-600">
               Fill out this application for your friends at Gidz Uni Path using your referral code and earn €100 once their visa is successfully approved.
