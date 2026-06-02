@@ -65,7 +65,7 @@ const CATEGORIES = [
     title: "Language, Culture & Education",
     description:
       "Pursue programs in Linguistics, German Studies, Cultural Studies, Translation Studies, Education, and International Teaching. Germany provides excellent academic environments for students interested in language, communication, and education careers.",
-    image: "/programs/masters/Gemini_Generated_Image_87h93487h93487h9.png",
+    image: "/programs/masters/languageCulture.png",
     imageAlt: "Language, Culture & Education",
   },
   {

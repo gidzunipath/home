@@ -9,7 +9,7 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 import {
-  canAccessVisaSection,
+  isVisaStageStatus,
   getJourneyFocusLabel,
 } from "../../../../lib/application-status";
 
@@ -41,7 +41,7 @@ export default function DashboardStats({ applicant, dashboardStats }) {
     (applicant?.payment1 ? 1 : 0) + (applicant?.payment2 ? 1 : 0);
   const paymentsComplete = applicant?.payment1 && applicant?.payment2;
 
-  const showVisaSection = canAccessVisaSection(applicant?.status);
+  const showVisaSection = isVisaStageStatus(applicant?.status);
 
   const nextLabelByFocus = {
     "University Documents": "Upload university documents",

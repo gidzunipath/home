@@ -547,6 +547,35 @@ const StudentDetails = () => {
               </h2>
             </div>
             <div className="p-6 space-y-6">
+              {/* O-Level Subjects */}
+              {student.EducationalQualification?.OLevel?.SubjectResults
+                ?.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-appleGray-700 mb-3 flex items-center space-x-2">
+                    <Icon
+                      icon="material-symbols:school-outline"
+                      className="text-lg text-appleGray-500"
+                    />
+                    <span>O-Level Subjects</span>
+                  </label>
+                  <div className="space-y-3">
+                    {student.EducationalQualification.OLevel.SubjectResults.map(
+                      (subject, index) => (
+                        <div
+                          key={index}
+                          className="bg-appleGray-100 border border-appleGray-200 rounded-2xl px-4 py-3 text-appleGray-800 flex justify-between items-center"
+                        >
+                          <span className="font-medium">{subject.Subject}</span>
+                          <span className="bg-sky-100 text-sky-700 px-3 py-1 rounded-xl font-semibold">
+                            {subject.Result || subject.Grade || "Not provided"}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* A-Level Subjects */}
               <div>
                 <label className="text-sm font-medium text-appleGray-700 mb-3 flex items-center space-x-2">

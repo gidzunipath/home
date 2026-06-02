@@ -1,21 +1,16 @@
 "use client";
 
 import VerticalStepper from "../VerticalStepper";
+import DocumentsToDownload from "../DocumentsToDownload";
 import {
   FaPassport,
   FaCheckCircle,
   FaComments,
-  FaCalendarAlt,
-  FaFileAlt,
-  FaUserEdit,
-  FaEnvelope,
-  FaPhone,
-  FaCertificate,
-  FaUniversity,
   FaQuestionCircle,
   FaLightbulb,
   FaExclamationTriangle,
 } from "react-icons/fa";
+import { INTERVIEW_STATUS } from "../../../../../lib/application-status";
 
 const INTERVIEW_QUESTIONS = [
   { q: "Q1: What is your name?", a: "My name is [Your Full Name]." },
@@ -143,10 +138,7 @@ export default function TasksTab({ applicant, visaStepsStatus, onMessageOpen }) 
     );
   }
 
-  const step4IsCurrent =
-    visaStepsStatus.find((s) => s.step === 4)?.status === "current";
-  const step5IsCurrent =
-    visaStepsStatus.find((s) => s.step === 5)?.status === "current";
+  const showInterviewPrep = applicant?.status === INTERVIEW_STATUS;
 
   const visaStepperSteps = visaStepsStatus.map((item) => ({
     id: item.step,
@@ -174,8 +166,12 @@ export default function TasksTab({ applicant, visaStepsStatus, onMessageOpen }) 
         </div>
       </div>
 
-      {/* Interview Prep — visible when step 4 is current */}
-      {step4IsCurrent && (
+      <div className="border-t border-appleGray-200 pt-8">
+        <DocumentsToDownload applicationId={applicant?.id} />
+      </div>
+
+      {/* Interview Prep — visible at Interview status (Step6) */}
+      {showInterviewPrep && (
         <div>
           <h3 className="text-xl font-bold text-appleGray-800 mb-6 flex items-center">
             <FaComments className="w-5 h-5 text-sky-500 mr-3" />
@@ -227,153 +223,6 @@ export default function TasksTab({ applicant, visaStepsStatus, onMessageOpen }) 
           </div>
         </div>
       )}
-
-      {/* Appointment Scheduling — visible when step 5 is current */}
-      {step5IsCurrent && (
-        <div>
-          <h3 className="text-xl font-bold text-appleGray-800 mb-6 flex items-center">
-            <FaCalendarAlt className="w-5 h-5 text-sky-500 mr-3" />
-            Visa Appointment Scheduling
-          </h3>
-          <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-3xl p-4 md:p-6">
-            <p className="text-sm text-appleGray-600">
-              Your counselor will guide you through scheduling your visa
-              appointment. Please contact us for further assistance.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Visa Document Checklist */}
-      <div>
-        <h3 className="text-xl font-bold text-appleGray-800 mb-6 flex items-center">
-          <FaPassport className="w-5 h-5 text-sky-500 mr-3" />
-          Visa Application – Document Checklist
-        </h3>
-
-        <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-3xl p-4 md:p-6">
-          <p className="text-appleGray-700 mb-6 text-sm">
-            To apply for your German student visa, please follow these steps
-            and submit all required documents via{" "}
-            <strong>WhatsApp</strong> or <strong>Email</strong>.
-          </p>
-
-          {/* Step 1 */}
-          <div className="mb-6">
-            <div className="flex items-start space-x-3 mb-3">
-              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <FaCheckCircle className="w-3 h-3 text-white" />
-              </div>
-              <h4 className="text-base font-semibold text-appleGray-800">
-                STEP 1: Create a New Email Address
-              </h4>
-            </div>
-            <p className="text-appleGray-600 ml-9 text-sm">
-              For a secure and organized visa process, please create a new
-              Gmail account and password exclusively for visa communications.
-            </p>
-          </div>
-
-          {/* Step 2 */}
-          <div className="mb-6">
-            <div className="flex items-start space-x-3 mb-3">
-              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <FaCheckCircle className="w-3 h-3 text-white" />
-              </div>
-              <h4 className="text-base font-semibold text-appleGray-800">
-                STEP 2: Submit the Following Documents
-              </h4>
-            </div>
-            <p className="text-appleGray-600 ml-9 mb-5 text-sm">
-              Please send clear scanned copies of the following documents:
-            </p>
-
-            <div className="ml-9 space-y-4">
-              {[
-                {
-                  icon: FaFileAlt,
-                  title: "1. Motivation Letter (for the Embassy)",
-                  content: (
-                    <>
-                      <p className="text-xs text-appleGray-500 mb-2">
-                        This is required along with your Admission Letter.
-                      </p>
-                      <p className="text-xs font-medium text-appleGray-700 mb-1">
-                        Your motivation letter should clearly include:
-                      </p>
-                      <ul className="text-xs text-appleGray-600 space-y-0.5">
-                        <li>• Why you want to study in Germany</li>
-                        <li>
-                          • Why you chose this specific degree and university
-                        </li>
-                        <li>• Your academic background</li>
-                        <li>• Your family background</li>
-                        <li>
-                          • Your goals after graduation and how you plan to
-                          contribute to Sri Lanka after returning
-                        </li>
-                      </ul>
-                    </>
-                  ),
-                },
-                {
-                  icon: FaPassport,
-                  title: "2. Passport Copy",
-                  content: (
-                    <ul className="text-xs text-appleGray-600 space-y-0.5">
-                      <li>
-                        • Include all passport pages with stamps, and especially
-                        pages 2 to 9
-                      </li>
-                    </ul>
-                  ),
-                },
-                {
-                  icon: FaUserEdit,
-                  title: "3. Biometric Photo",
-                  content: (
-                    <ul className="text-xs text-appleGray-600 space-y-0.5">
-                      <li>
-                        • Must be a recent photo with a white background
-                      </li>
-                      <li>
-                        • Follows German visa photo specifications (35mm × 45mm)
-                      </li>
-                    </ul>
-                  ),
-                },
-                {
-                  icon: FaCertificate,
-                  title: "4. Work Experience / Courses",
-                  content: (
-                    <ul className="text-xs text-appleGray-600 space-y-0.5">
-                      <li>
-                        • Include any job experience letters, internships, or
-                        extra courses you have completed (if applicable)
-                      </li>
-                    </ul>
-                  ),
-                },
-              ].map(({ icon: Icon, title, content }) => (
-                <div
-                  key={title}
-                  className="bg-white rounded-2xl p-4 border border-orange-200"
-                >
-                  <div className="flex items-start space-x-3 mb-3">
-                    <Icon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0 hidden md:inline" />
-                    <h5 className="text-sm font-semibold text-appleGray-800">
-                      {title}
-                    </h5>
-                  </div>
-                  <div className="md:ml-8">{content}</div>
-                </div>
-              ))}
-
-            
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

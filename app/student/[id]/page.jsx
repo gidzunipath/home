@@ -4,9 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   FaUserGraduate,
   FaTimes,
-  FaFileAlt,
   FaClock,
-  FaSearch,
   FaComments,
   FaCalendarAlt,
 } from "react-icons/fa";
@@ -36,6 +34,9 @@ import TimelineTab from "./components/tabs/TimelineTab";
 import {
   canAccessGermanLifeSection,
   canAccessVisaSection,
+  getApplicationProgressPercentage,
+  getApplicationStepNumber,
+  isOnOrPastInterviewStage,
   TAB_ACCESS_DENIED,
 } from "../../../lib/application-status";
 import TabAccessDenied from "./components/TabAccessDenied";
@@ -50,44 +51,6 @@ const VALID_CLIENT_TAB_IDS = new Set([
   "german-life",
   "timeline",
 ]);
-
-const getVisaSteps = () => [
-  {
-    step: 1,
-    title: "Application Document",
-    description: "Complete and submit your visa application documents",
-    dbOptionName: "Application Document",
-    icon: FaFileAlt,
-  },
-  {
-    step: 2,
-    title: "Document Submitted on waiting list",
-    description: "Your documents are submitted and in the processing queue",
-    dbOptionName: "Submit Documents",
-    icon: FaClock,
-  },
-  {
-    step: 3,
-    title: "Under Preliminary Review",
-    description: "Embassy is conducting preliminary review of your application",
-    dbOptionName: "Client Review",
-    icon: FaSearch,
-  },
-  {
-    step: 4,
-    title: "Interview Preparation",
-    description: "Prepare for your visa interview if required",
-    dbOptionName: "Interview Preparation",
-    icon: FaComments,
-  },
-  {
-    step: 5,
-    title: "Appointment Date",
-    description: "Schedule and attend your visa appointment",
-    dbOptionName: "Appointment Date",
-    icon: FaCalendarAlt,
-  },
-];
 
 const ApplicantDetail = () => {
   const { showWarning, showError } = useAppModal();
@@ -157,56 +120,41 @@ const ApplicantDetail = () => {
     }
   }, [authLoading, isAuthenticated, authType, user, router]);
 
-  // Visa steps
-  const fetchVisaStepsStatus = useCallback(async (applicationId) => {
-    if (!applicationId) return [];
-    try {
-      const steps = getVisaSteps();
-      const stepsWithStatus = await Promise.all(
-        steps.map(async (step) => {
-          const { data, error } = await supabase
-            .from("options")
-            .select("option")
-            .eq("application_id", applicationId)
-            .eq("name", step.dbOptionName);
-          if (error) return { ...step, status: "pending" };
-          return {
-            ...step,
-            status:
-              data && data.length > 0 && data[0].option
-                ? "completed"
-                : "pending",
-          };
-        })
-      );
+  // Visa tab progress: steps 1–2 always complete; step 3 when status is Interview+
+  const syncVisaStepsFromStatus = useCallback((applicationStatus) => {
+    const stepNum = getApplicationStepNumber(applicationStatus);
+    const interviewReached = isOnOrPastInterviewStage(applicationStatus);
 
-      let currentFound = false;
-      const final = stepsWithStatus.map((step) => {
-        if (step.status === "pending" && !currentFound) {
-          currentFound = true;
-          return { ...step, status: "current" };
-        }
-        return step;
-      });
-
-      if (!currentFound && final.length > 0) {
-        final[final.length - 1] = {
-          ...final[final.length - 1],
-          status: "current",
-        };
-      }
-
-      setVisaStepsStatus(final);
-      return final;
-    } catch {
-      const steps = getVisaSteps();
-      const defaultSteps = steps.map((step, i) => ({
-        ...step,
-        status: i === 0 ? "current" : "pending",
-      }));
-      setVisaStepsStatus(defaultSteps);
-      return defaultSteps;
-    }
+    const steps = [
+      {
+        step: 1,
+        title: "Document Submitted on to the Embassy",
+        description:
+          "Your documents are submitted and in the processing queue",
+        icon: FaClock,
+        status: "completed",
+      },
+      {
+        step: 2,
+        title: "Appointment Date",
+        description: "Schedule your visa appointment",
+        icon: FaCalendarAlt,
+        status: "completed",
+      },
+      {
+        step: 3,
+        title: "Interview and Appointment",
+        description: "Prepare for your visa interview",
+        icon: FaComments,
+        status: interviewReached
+          ? "completed"
+          : stepNum >= 5
+            ? "current"
+            : "pending",
+      },
+    ];
+    setVisaStepsStatus(steps);
+    return steps;
   }, []);
 
   // Dashboard stats
@@ -218,16 +166,9 @@ const ApplicantDetail = () => {
           .select("*")
           .eq("application_id", id);
 
-        const statusToProgress = {
-          1: 16.67,
-          2: 33.33,
-          3: 50,
-          4: 66.67,
-          5: 83.33,
-          6: 100,
-        };
-        const currentStep = applicantData.status?.slice(-1) || "1";
-        const progressPercentage = statusToProgress[currentStep] || 0;
+        const progressPercentage = getApplicationProgressPercentage(
+          applicantData.status
+        );
         const documents = applicantData.documents || [];
 
         setDashboardStats({
@@ -323,14 +264,14 @@ const ApplicantDetail = () => {
           );
           if (profileDoc) setProfilePicUrl(profileDoc.url);
           calculateDashboardStats(data);
-          fetchVisaStepsStatus(applicantId).catch(console.error);
+          syncVisaStepsFromStatus(data.status);
           generateNotifications(data);
         }
       } catch (error) {
         console.error("Error fetching applicant:", error);
       }
     },
-    [calculateDashboardStats, fetchVisaStepsStatus]
+    [calculateDashboardStats, syncVisaStepsFromStatus]
   );
 
   useEffect(() => {
@@ -436,10 +377,10 @@ const ApplicantDetail = () => {
                 <DocumentsTab applicationId={id} />
               )}
               {activeTab === "universities" && (
-                <UniversitiesTab applicationId={id} />
+                <UniversitiesTab applicationId={id} applicant={applicant} />
               )}
               {activeTab === "tasks" &&
-                (canAccessVisaSection(applicant?.status) ? (
+                (canAccessVisaSection(applicant?.status, applicant?.lock_1) ? (
                   <TasksTab
                     applicant={applicant}
                     visaStepsStatus={visaStepsStatus}

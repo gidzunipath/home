@@ -16,7 +16,7 @@ const defaultTestimonialsData = [
   {
     id: 5,
     text: "I applied for my visa through GIDZ UniPath, and their consultants made my journey to Germany seamless. The entire process was quick and efficient, allowing me to focus on my goals without unnecessary stress. They guided me through every step with exceptional support and expertise. I highly recommend GIDZ UniPath to anyone looking to start their journey abroad with confidence.",
-    name: "Sri Skandarajah Dilrukshan",
+    name: "Sri Skandarajah ",
     avatar: "/stu1.jpg",
     program: "Computer Science",
     university: "Technical University of Munich",
@@ -143,7 +143,7 @@ export default function TestimonialsCarousel() {
         {/* Header */}
         <div className="text-center mb-20 animate-fade-in-up">
           <h2 className="text-4xl lg:text-5xl font-bold text-appleGray-800 mb-6 leading-tight">
-            Success Stories from <span className="text-gradient">Germany</span>
+            Success Stories from <span className="text-gradient">Germany</span> 
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-sky-500 to-sky-400 mx-auto mb-6"></div>
           <p className="text-xl text-appleGray-600 max-w-3xl mx-auto leading-relaxed">

@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS feedbacks (
   allow_display_name BOOLEAN DEFAULT true,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   admin_notes TEXT,
+  image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

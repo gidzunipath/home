@@ -1,8 +1,16 @@
 // Feedback Management API
-import { supabase } from "../../../lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-// GET: Fetch feedbacks (with different access levels)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+const IMAGE_URL_MISSING = "column feedbacks.image_url does not exist";
+
+// GET: Fetch feedbacks
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -10,43 +18,58 @@ export async function GET(request) {
     const status = searchParams.get("status");
     const includePrivate = searchParams.get("includePrivate") === "true";
 
-    let query = supabase
+    const selectFields = `
+      id,
+      application_id,
+      client_name,
+      rating,
+      title,
+      message,
+      program_type,
+      university,
+      allow_display_name,
+      status,
+      admin_notes,
+      image_url,
+      created_at,
+      updated_at
+    `;
+
+    let query = supabaseAdmin
       .from("feedbacks")
-      .select(
-        `
-        id,
-        application_id,
-        client_name,
-        rating,
-        title,
-        message,
-        program_type,
-        university,
-        allow_display_name,
-        status,
-        admin_notes,
-        created_at,
-        updated_at
-      `
-      )
+      .select(selectFields)
       .order("created_at", { ascending: false });
 
-    // Filter by application ID if provided (for client view)
-    if (applicationId) {
-      query = query.eq("application_id", applicationId);
-    }
+    if (applicationId) query = query.eq("application_id", applicationId);
+    if (status) query = query.eq("status", status);
 
-    // Filter by status if provided
-    if (status) {
-      query = query.eq("status", status);
-    }
-
-    // For public testimonials, only show approved feedbacks
     if (!includePrivate) {
       query = query.eq("status", "approved").eq("allow_display_name", true);
     }
 
-    const { data, error } = await query;
+    let { data, error } = await query;
+
+    // Graceful fallback if image_url column doesn't exist yet
+    if (error && error.message?.includes(IMAGE_URL_MISSING)) {
+      const selectWithoutImage = selectFields.replace(/,\s*image_url/, "");
+      let fallbackQuery = supabaseAdmin
+        .from("feedbacks")
+        .select(selectWithoutImage)
+        .order("created_at", { ascending: false });
+
+      if (applicationId) fallbackQuery = fallbackQuery.eq("application_id", applicationId);
+      if (status) fallbackQuery = fallbackQuery.eq("status", status);
+
+      if (!includePrivate) {
+        fallbackQuery = fallbackQuery
+          .eq("status", "approved")
+          .eq("allow_display_name", true);
+      }
+
+      const result = await fallbackQuery;
+      data = (result.data || []).map((row) => ({ ...row, image_url: null }));
+      error = result.error;
+    }
 
     if (error) {
       console.error("Error fetching feedbacks:", error);
@@ -73,10 +96,7 @@ export async function GET(request) {
 // POST: Create new feedback
 export async function POST(request) {
   try {
-    console.log("POST /api/feedbacks - Request received");
     const body = await request.json();
-    console.log("Request body:", body);
-
     const {
       application_id,
       client_name,
@@ -88,9 +108,7 @@ export async function POST(request) {
       allow_display_name = true,
     } = body;
 
-    // Validation
     if (!application_id || !client_name || !rating || !title || !message) {
-      console.log("Validation failed - missing required fields");
       return NextResponse.json(
         {
           success: false,
@@ -102,17 +120,13 @@ export async function POST(request) {
     }
 
     if (rating < 1 || rating > 5) {
-      console.log("Validation failed - invalid rating:", rating);
       return NextResponse.json(
         { success: false, error: "Rating must be between 1 and 5" },
         { status: 400 }
       );
     }
 
-    console.log("Validation passed, inserting into database...");
-
-    // Insert feedback
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("feedbacks")
       .insert([
         {
@@ -124,7 +138,7 @@ export async function POST(request) {
           program_type,
           university,
           allow_display_name,
-          status: "pending", // Default status
+          status: "pending",
         },
       ])
       .select()
@@ -138,12 +152,10 @@ export async function POST(request) {
       );
     }
 
-    console.log("Feedback created successfully:", data);
     return NextResponse.json({
       success: true,
       data,
-      message:
-        "Feedback submitted successfully! It will be reviewed by our team.",
+      message: "Feedback submitted successfully! It will be reviewed by our team.",
     });
   } catch (error) {
     console.error("API Error in POST /api/feedbacks:", error);
@@ -154,43 +166,77 @@ export async function POST(request) {
   }
 }
 
-// PUT: Update feedback status (Admin only)
+// PUT: Update feedback (Admin only — status, notes, image)
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { id, status, admin_notes } = body;
+    const { id, status, admin_notes, image_url } = body;
 
-    // Basic validation
-    if (!id || !status) {
+    if (!id) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields: id, status" },
+        { success: false, error: "Missing required field: id" },
         { status: 400 }
       );
     }
 
-    if (!["pending", "approved", "rejected"].includes(status)) {
+    const updates = { updated_at: new Date().toISOString() };
+
+    if (status !== undefined) {
+      if (!["pending", "approved", "rejected"].includes(status)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Invalid status. Must be: pending, approved, or rejected",
+          },
+          { status: 400 }
+        );
+      }
+      updates.status = status;
+    }
+
+    if (admin_notes !== undefined) updates.admin_notes = admin_notes;
+    if (image_url !== undefined) updates.image_url = image_url;
+
+    if (Object.keys(updates).length === 1) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid status. Must be: pending, approved, or rejected",
-        },
+        { success: false, error: "No fields to update" },
         { status: 400 }
       );
     }
 
-    // Update feedback
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("feedbacks")
-      .update({
-        status,
-        admin_notes,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updates)
       .eq("id", id)
       .select()
       .single();
 
     if (error) {
+      // If image_url column missing, retry without it
+      if (error.message?.includes(IMAGE_URL_MISSING) && image_url !== undefined) {
+        const { image_url: _drop, ...updatesWithoutImage } = updates;
+        const { data: fallbackData, error: fallbackError } = await supabaseAdmin
+          .from("feedbacks")
+          .update(updatesWithoutImage)
+          .eq("id", id)
+          .select()
+          .single();
+
+        if (fallbackError) {
+          return NextResponse.json(
+            { success: false, error: fallbackError.message },
+            { status: 500 }
+          );
+        }
+
+        return NextResponse.json({
+          success: false,
+          error:
+            "Photo requires a database column. Run in Supabase SQL Editor: ALTER TABLE feedbacks ADD COLUMN IF NOT EXISTS image_url TEXT;",
+          data: fallbackData,
+        });
+      }
+
       console.error("Error updating feedback:", error);
       return NextResponse.json(
         { success: false, error: error.message },
@@ -198,17 +244,12 @@ export async function PUT(request) {
       );
     }
 
-    if (!data) {
-      return NextResponse.json(
-        { success: false, error: "Feedback not found" },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json({
       success: true,
       data,
-      message: `Feedback ${status} successfully!`,
+      message: status
+        ? `Feedback ${status} successfully!`
+        : "Feedback updated successfully!",
     });
   } catch (error) {
     console.error("API Error:", error);
@@ -232,10 +273,12 @@ export async function DELETE(request) {
       );
     }
 
-    const { error } = await supabase.from("feedbacks").delete().eq("id", id);
+    const { error } = await supabaseAdmin
+      .from("feedbacks")
+      .delete()
+      .eq("id", id);
 
     if (error) {
-      console.error("Error deleting feedback:", error);
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }

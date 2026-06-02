@@ -59,10 +59,10 @@ const DocumentsToDownload = ({ applicationId, documentType }) => {
       <div className="mb-6">
         <h3 className="text-xl font-bold text-appleGray-800 mb-2 flex items-center">
           <FaDownload className="w-5 h-5 text-sky-500 mr-2" />
-          Downloads
+          Visa Documents for Embassy
         </h3>
         <p className="text-sm text-appleGray-600">
-          Files shared by GIDZ Uni Path for your university application.
+          Files shared by GIDZ Uni Path for your visa application.
         </p>
       </div>
 

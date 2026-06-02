@@ -10,8 +10,14 @@ import DcoumentsFromUs from "../../components/DocumentsFromUs";
 import ApplicationOptions from "../../components/ApplicationOptoins";
 import ProfilePic from "../../components/ProfilePic";
 import SpecialNotesEditor from "../../components/SpecialNotesEditor";
+import {
+  ChangeStatusModal,
+  getStatusLabel,
+  getStatusBadgeClass,
+} from "../../components/ApplicationStatusModal";
 import axios from "axios";
 import Image from "next/image";
+import { emailAssetUrl } from "../../../../lib/emailAssets";
 
 const EDUCATIONAL_BACKGROUNDS = [
   "Bachelors",
@@ -182,7 +188,6 @@ const TABS = [
   { id: "universities", label: "Universities", icon: "mdi:university" },
   { id: "uni-progress", label: "Uni Progress", icon: "mdi:school" },
   { id: "visa-progress", label: "Visa Progress", icon: "mdi:passport" },
-  { id: "visa-tracker", label: "Visa Tracker", icon: "mdi:map-marker-check" },
   { id: "notes", label: "Notes", icon: "mdi:note-text" },
 ];
 
@@ -204,6 +209,8 @@ const ApplicantDetail = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [tempPassword, setTempPassword] = useState("");
   const [lockstate, setlockstate] = useState(false);
+  const [showChangeStatusModal, setShowChangeStatusModal] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Notification Modal State
   const [notification, setNotification] = useState({
@@ -385,7 +392,7 @@ const ApplicantDetail = () => {
                         <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 32px 32px 40px 32px; position: relative;">
                             <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
                                 <div style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-                                    <img src="/gidz-logo-image.jpg" style="height: 32px; width: auto;" alt="Gidz Uni Path Logo" />
+                                    <img src="${emailAssetUrl("/gidz-transperant.png")}" style="height: 48px; width: auto;" alt="Gidz Uni Path Logo" />
                                 </div>
                                 <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.025em;">Gidz Uni Path</h1>
                             </div>
@@ -595,6 +602,38 @@ const ApplicantDetail = () => {
   //  Handle Lock
   // -------------------------------------------
 
+  const handleChangeStatus = async (newStatus) => {
+    if (!applicant || newStatus === applicant.status) return;
+
+    setUpdatingStatus(true);
+    try {
+      const { error } = await supabase
+        .from("applications")
+        .update({ status: newStatus })
+        .eq("id", applicant.id);
+
+      if (error) throw error;
+
+      await fetchApplicant(applicant.id);
+      setNotification({
+        isOpen: true,
+        title: "Success",
+        message: `Status updated to ${getStatusLabel(newStatus)}.`,
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Error updating status:", error.message);
+      setNotification({
+        isOpen: true,
+        title: "Error",
+        message: "Failed to update status. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const handleLock = async () => {
     try {
       const { error } = await supabase
@@ -766,6 +805,12 @@ const ApplicantDetail = () => {
                       Application ID: {applicant.id}
                     </p>
                     <div className="flex flex-wrap gap-2">
+                      <span
+                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getStatusBadgeClass(applicant.status)}`}
+                      >
+                        <Icon icon="mdi:progress-check" className="inline mr-1.5" />
+                        {getStatusLabel(applicant.status)}
+                      </span>
                       <div className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                         <Icon icon="mdi:email" className="inline mr-1.5" />
                         {applicant.email}
@@ -780,6 +825,15 @@ const ApplicantDetail = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+                <button
+                  type="button"
+                  className="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-6 py-3 rounded-xl hover:from-sky-600 hover:to-sky-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm font-semibold disabled:opacity-60"
+                  onClick={() => setShowChangeStatusModal(true)}
+                  disabled={updatingStatus}
+                >
+                  <Icon icon="material-symbols:sync" className="text-lg" />
+                  Change Status
+                </button>
                 <button
                   className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm font-semibold"
                   onClick={handleOpenPasswordModal}
@@ -1199,33 +1253,6 @@ const ApplicantDetail = () => {
           </div>
           )}
 
-          {/* Visa Tracker Section */}
-          {activeTab === "visa-tracker" && (
-          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Icon icon="mdi:map-marker-check" className="text-xl text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Visa Tracker</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all duration-200">
-                <ApplicationOptions
-                  applicationId={id}
-                  optionsToCheck={[
-                    { name: "Application Document", option: false },
-                    { name: "Submit Documents", option: false },
-                    { name: "Client Review", option: false },
-                    { name: "Interview Preparation", option: false },
-                    { name: "Appointment Date", option: false },
-                  ]}
-                  title="Application Tracker"
-                />
-              </div>
-            </div>
-          </div>
-          )}
-
           {/* Special Notes Section */}
           {activeTab === "notes" && (
           <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6">
@@ -1248,6 +1275,14 @@ const ApplicantDetail = () => {
           )}
         </div>
       </div>
+
+      {showChangeStatusModal && applicant && (
+        <ChangeStatusModal
+          application={applicant}
+          onClose={() => setShowChangeStatusModal(false)}
+          onChangeStatus={handleChangeStatus}
+        />
+      )}
 
       {/* Password Creation Modal */}
       {showPasswordModal && (

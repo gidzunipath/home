@@ -1,7 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { Icon } from "@iconify/react";
+
+const PAGE_SIZE = 10;
+
+const parseWorkRow = (row) => {
+  const raw = row.data;
+  const jsonStr = Array.isArray(raw) ? raw[0] : raw;
+  const workData = JSON.parse(jsonStr);
+  return {
+    id: row.id,
+    ...workData,
+    MarkasRead: workData.MarkasRead ?? false,
+  };
+};
 
 // A reusable backdrop for modals
 const ModalBackdrop = ({ onClick }) => (
@@ -16,12 +29,26 @@ const WorkQuery = () => {
   const [workerToDelete, setWorkerToDelete] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [referralFilterOnly, setReferralFilterOnly] = useState(false);
-  const [filteredWorks, setFilteredWorks] = useState([]);
+  const [unreadFilterOnly, setUnreadFilterOnly] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [referralLookupId, setReferralLookupId] = useState(null);
   const [referralErrorModal, setReferralErrorModal] = useState(null);
+  const loadMoreRef = useRef(null);
+
+  // Debounce the search term so we don't hit the DB on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Get current user information
   useEffect(() => {
@@ -44,89 +71,152 @@ const WorkQuery = () => {
     getCurrentUser();
   }, []);
 
-  // Fetch work_visa data
-  useEffect(() => {
-    if (!currentUser) return;
+  // Fetch a single page of work_visa data, with optional DB-level search
+  const fetchPage = useCallback(
+    async (from, search = "") => {
+      let query = supabase
+        .from("work_visa")
+        .select("*", { count: "exact" })
+        .order("id", { ascending: false })
+        .range(from, from + PAGE_SIZE - 1);
 
-    const fetchWorks = async () => {
-      setIsLoading(true);
-      try {
-      // First get the work visa data
-      let query = supabase.from("work_visa").select("*");
-
-      // If user is staff, only show assigned works
-      if (currentUser.role === "staff") {
+      if (currentUser?.role === "staff") {
         query = query.eq("assigned_to", currentUser.id);
       }
 
-      console.log("🔍 Fetching works with query:", query);
-      const { data, error } = await query;
+      // Search across the entire JSON data column at the DB level
+      if (search.trim()) {
+        query = query.filter("data::text", "ilike", `%${search.trim()}%`);
+      }
+
+      const { data, error, count } = await query;
 
       if (error) {
         console.error("Error fetching data:", error.message);
-        return;
+        return null;
       }
 
-      console.log("🔍 Raw work data from database:", data);
+      const parsed = (data || []).map(parseWorkRow);
 
-      const parsedData = data.map((row) => {
-        const workData = JSON.parse(row.data);
-        return {
-          id: row.id,
-          ...workData,
-          MarkasRead: workData.MarkasRead ?? false,
-        };
-      });
+      return {
+        items: parsed,
+        hasMore: (data?.length || 0) === PAGE_SIZE,
+        nextOffset: from + (data?.length || 0),
+        total: count ?? 0,
+      };
+    },
+    [currentUser]
+  );
 
-      setWorks(parsedData);
-      setFilteredWorks(parsedData);
-      } finally {
-        setIsLoading(false);
+  const loadInitial = useCallback(async () => {
+    if (!currentUser) return;
+
+    setIsLoading(true);
+    setWorks([]);
+    setOffset(0);
+    setHasMore(true);
+
+    try {
+      let allItems = [];
+      let from = 0;
+      let more = true;
+      let total = 0;
+
+      while (true) {
+        const result = await fetchPage(from, debouncedSearch);
+        if (!result) break;
+
+        allItems = [...allItems, ...result.items];
+        from = result.nextOffset;
+        more = result.hasMore;
+        total = result.total;
+
+        if (
+          !unreadFilterOnly ||
+          allItems.filter((w) => !w.MarkasRead).length >= PAGE_SIZE ||
+          !more
+        ) {
+          break;
+        }
       }
-    };
 
-    fetchWorks();
-  }, [currentUser]);
+      setWorks(allItems);
+      setHasMore(more);
+      setOffset(from);
+      setTotalCount(total);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUser, fetchPage, unreadFilterOnly, debouncedSearch]);
 
-  // Filter works based on search term and referral code
+  const loadMore = useCallback(async () => {
+    if (!currentUser || isLoading || isLoadingMore || !hasMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const result = await fetchPage(offset, debouncedSearch);
+      if (!result) return;
+
+      setWorks((prev) => [...prev, ...result.items]);
+      setHasMore(result.hasMore);
+      setOffset(result.nextOffset);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [currentUser, isLoading, isLoadingMore, hasMore, offset, fetchPage, debouncedSearch]);
+
   useEffect(() => {
+    loadInitial();
+  }, [loadInitial]);
+
+  // Infinite scroll
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore, isLoading]);
+
+  // Client-side filters (unread, referral) applied on top of DB-searched results
+  const filteredWorks = useMemo(() => {
     let filtered = works;
+
+    if (unreadFilterOnly) {
+      filtered = filtered.filter((work) => !work.MarkasRead);
+    }
 
     if (referralFilterOnly) {
       filtered = filtered.filter((work) => work.referenceCode?.trim());
     }
 
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (work) =>
-          work.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          work.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          work.email?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredWorks(filtered);
-  }, [searchTerm, referralFilterOnly, works]);
+    return filtered;
+  }, [works, referralFilterOnly, unreadFilterOnly]);
 
   // Toggle MarkasRead status
   const toggleMarkasRead = async (workId, currentStatus) => {
-    // Find the work in the list
     const work = works.find((s) => s.id === workId);
     if (!work) return;
 
-    // Update MarkasRead value
     const updatedData = {
       ...work,
-      MarkasRead: !currentStatus, // Toggle true/false
+      MarkasRead: !currentStatus,
     };
 
-    // Remove `id` before storing (since it's a separate column)
     delete updatedData.id;
 
-    // ✅ Ensure JSON is properly stored as an array of a single string
     const { error } = await supabase
       .from("work_visa")
-      .update({ data: JSON.stringify(updatedData) }) // Store JSON inside an array
+      .update({ data: JSON.stringify(updatedData) })
       .eq("id", workId);
 
     if (error) {
@@ -161,7 +251,6 @@ const WorkQuery = () => {
       setWorks(works.filter((work) => work.id !== workerToDelete));
     }
 
-    // Close Modal
     setIsDeleteModalOpen(false);
     setWorkerToDelete(null);
   };
@@ -227,19 +316,40 @@ const WorkQuery = () => {
                 <div className="flex-1 max-w-sm">
                   <div className="relative">
                     <Icon
-                      icon="material-symbols:search"
-                      className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-appleGray-400 text-lg"
+                      icon={debouncedSearch !== searchTerm ? "material-symbols:progress-activity" : "material-symbols:search"}
+                      className={`absolute left-2.5 top-1/2 transform -translate-y-1/2 text-appleGray-400 text-lg ${debouncedSearch !== searchTerm ? "animate-spin" : ""}`}
                     />
                     <input
                       type="text"
-                      placeholder="Search workers..."
+                      placeholder="Search by name or email..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-9 pr-4 py-2 bg-appleGray-50 border border-appleGray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 text-sm"
                     />
+                    {searchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchTerm("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-appleGray-400 hover:text-appleGray-600"
+                      >
+                        <Icon icon="material-symbols:close" className="text-base" />
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setUnreadFilterOnly((prev) => !prev)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 whitespace-nowrap ${
+                      unreadFilterOnly
+                        ? "bg-amber-500 text-white shadow-sm"
+                        : "bg-appleGray-100 text-appleGray-600 hover:bg-appleGray-200"
+                    }`}
+                  >
+                    <Icon icon="material-symbols:mark-email-unread" className="text-sm" />
+                    <span>Unread only</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setReferralFilterOnly((prev) => !prev)}
@@ -253,7 +363,7 @@ const WorkQuery = () => {
                     <span>With referral code</span>
                   </button>
                   <div className="text-xs text-appleGray-400 font-medium">
-                    {filteredWorks.length} of {works.length} applications
+                    {filteredWorks.length} shown · {works.length} of {totalCount} loaded
                   </div>
                 </div>
               </div>
@@ -401,7 +511,7 @@ const WorkQuery = () => {
                 </table>
 
                 {/* Empty State */}
-                {filteredWorks.length === 0 && (
+                {filteredWorks.length === 0 && !isLoading && (
                   <div className="text-center py-10">
                     <div className="w-12 h-12 bg-appleGray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                       <Icon
@@ -410,19 +520,34 @@ const WorkQuery = () => {
                       />
                     </div>
                     <h3 className="text-sm font-semibold text-appleGray-700 mb-1">
-                      {searchTerm || referralFilterOnly
+                      {debouncedSearch || referralFilterOnly || unreadFilterOnly
                         ? "No workers found"
                         : currentUser?.role === "staff"
                         ? "No assigned applications"
                         : "No work applications yet"}
                     </h3>
                     <p className="text-xs text-appleGray-400">
-                      {searchTerm || referralFilterOnly
+                      {debouncedSearch || referralFilterOnly || unreadFilterOnly
                         ? "Try adjusting your search or filter criteria"
                         : currentUser?.role === "staff"
                         ? "You haven't been assigned any work visa applications yet"
                         : "Work visa applications will appear here once submitted"}
                     </p>
+                  </div>
+                )}
+
+                {/* Infinite scroll sentinel */}
+                {!isLoading && (filteredWorks.length > 0 || (hasMore && unreadFilterOnly)) && (
+                  <div ref={loadMoreRef} className="py-4 flex justify-center">
+                    {isLoadingMore && (
+                      <div className="flex items-center gap-2 text-xs text-appleGray-400">
+                        <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                        Loading more...
+                      </div>
+                    )}
+                    {!isLoadingMore && !hasMore && (
+                      <p className="text-xs text-appleGray-400">All applications loaded</p>
+                    )}
                   </div>
                 )}
               </div>

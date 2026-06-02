@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import Testimonials from "./components/home/testimonials-apple";
 import SuccessCarousel from "./components/home/SuccessCarousel";
+import SuccessStoriesSection from "./components/home/success-stories/SuccessStoriesSection";
 import TeamSection from "./components/home/TeamSection";
 import PartnersSection from "./components/home/PartnersSection";
 import AppointmentModal from "./student/[id]/components/AppointmentModal";
@@ -253,8 +253,9 @@ export default function Home() {
           </div> */}
         </div>
       </section>
-      
+
       <SuccessCarousel />
+
       {/* Services Section - Apple-style cards */}
       <section className="py-24 bg-appleGray-50 relative overflow-hidden">
         {/* Floating elements for services section */}
@@ -394,8 +395,9 @@ export default function Home() {
 
       <PartnersSection />
 
-      {/* Testimonials Section */}
-      <Testimonials /> {/* Contact Section */}
+      <SuccessStoriesSection />
+
+      {/* Contact Section */}
       <section className="py-24 bg-white relative overflow-hidden">
         {/* Floating elements for contact section */}
         <div

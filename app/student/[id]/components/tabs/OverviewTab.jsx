@@ -295,35 +295,7 @@ export default function OverviewTab({
               </div>
             </div>
 
-            {/* Submit */}
-            <div className="ml-9">
-              <div className="flex items-center space-x-2 mb-3">
-                <FaEnvelope className="w-4 h-4 text-green-600 hidden md:inline" />
-                <h5 className="text-sm font-semibold text-appleGray-800">
-                  Submit Documents To: WhatsApp or Email
-                </h5>
-              </div>
-              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-4">
-                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-                  <a
-                    href="https://wa.me/94741166235"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 min-h-[44px] w-full sm:w-auto"
-                  >
-                    <FaPhone className="w-4 h-4 hidden md:inline" />
-                    <span>WhatsApp: +94741166235</span>
-                  </a>
-                  <a
-                    href="mailto:gidzunipath@gmail.com"
-                    className="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 min-h-[44px] w-full sm:w-auto"
-                  >
-                    <FaEnvelope className="w-4 h-4 hidden md:inline" />
-                    <span>Email: gidzunipath@gmail.com</span>
-                  </a>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>

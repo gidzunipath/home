@@ -243,6 +243,11 @@ const StudentApplicationForm = () => {
     "Zimbabwe",
   ];
 
+  const currentYear = new Date().getFullYear();
+  const academicYearOptions = Array.from({ length: 3 }, (_, i) =>
+    String(currentYear + i)
+  );
+
   const [formData, setFormData] = useState({
     PersonalInformation: {
       FirstName: "",
@@ -258,6 +263,13 @@ const StudentApplicationForm = () => {
       Country: "",
     },
     EducationalQualification: {
+      OLevel: {
+        SubjectResults: [
+          { Subject: "English", Result: "" },
+          { Subject: "Math", Result: "" },
+          { Subject: "Science", Result: "" },
+        ],
+      },
       ALevel: {
         SubjectResults: [
           { Subject: "", Result: "" },
@@ -767,6 +779,13 @@ const StudentApplicationForm = () => {
           Country: "",
         },
         EducationalQualification: {
+          OLevel: {
+            SubjectResults: [
+              { Subject: "English", Result: "" },
+              { Subject: "Math", Result: "" },
+              { Subject: "Science", Result: "" },
+            ],
+          },
           ALevel: {
             SubjectResults: [
               { Subject: "", Result: "" },
@@ -1430,6 +1449,60 @@ const StudentApplicationForm = () => {
             </p>
           </div>
 
+          {/* O-Level Results Section */}
+          <div className="bg-appleGray-50 p-6 rounded-2xl">
+            <h5 className="text-lg font-semibold text-appleGray-800 mb-4">
+              G.C.E. Ordinary Level (O/L) Results
+            </h5>
+
+            {formData.EducationalQualification.OLevel.SubjectResults.map(
+              (subject, index) => (
+                <div
+                  key={subject.Subject}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+                >
+                  <div>
+                    <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                      Subject
+                    </label>
+                    <div className="w-full px-4 py-3 border border-appleGray-200 rounded-2xl bg-white text-appleGray-800">
+                      {subject.Subject}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-appleGray-700 mb-2">
+                      Grade
+                    </label>
+                    <select
+                      value={subject.Result}
+                      onChange={(e) => {
+                        const newSubjects = [
+                          ...formData.EducationalQualification.OLevel
+                            .SubjectResults,
+                        ];
+                        newSubjects[index].Result = e.target.value;
+                        handleInputChange(
+                          "EducationalQualification",
+                          "OLevel.SubjectResults",
+                          newSubjects
+                        );
+                      }}
+                      className="w-full px-4 py-3 border border-appleGray-200 rounded-2xl focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select grade</option>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="S">S</option>
+                      <option value="F">F</option>
+                    </select>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+
           {/* A-Level Results Section */}
           <div className="bg-appleGray-50 p-6 rounded-2xl">
             <h5 className="text-lg font-semibold text-appleGray-800 mb-4">
@@ -1613,46 +1686,6 @@ const StudentApplicationForm = () => {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-appleGray-700 mb-2">
-              Additional Documents
-            </label>
-            <div className="border-2 border-dashed border-appleGray-300 rounded-2xl p-6 sm:p-8 text-center hover:border-sky-500 transition-all duration-200">
-              <FaFileUpload className="w-6 h-6 sm:w-8 sm:h-8 text-appleGray-400 mx-auto mb-3 sm:mb-4" />
-              <input
-                type="file"
-                onChange={(e) =>
-                  handleInputChange(
-                    "EducationalQualification",
-                    "TranscriptOrAdditionalDocument",
-                    e.target.files[0]
-                  )
-                }
-                className="hidden"
-                id="transcript-upload"
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-              <label
-                htmlFor="transcript-upload"
-                className="cursor-pointer text-sky-500 hover:text-sky-600 font-semibold"
-              >
-                Click to upload additional documents
-              </label>
-              <p className="text-sm text-appleGray-500 mt-2">
-                PDF, JPG, PNG up to 10MB
-              </p>
-              {formData.EducationalQualification
-                .TranscriptOrAdditionalDocument && (
-                <p className="text-sm text-green-600 mt-2">
-                  ✓{" "}
-                  {
-                    formData.EducationalQualification
-                      .TranscriptOrAdditionalDocument.name
-                  }
-                </p>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* English Proficiency Section */}
@@ -1998,9 +2031,11 @@ const StudentApplicationForm = () => {
               required
             >
               <option value="">Select academic year</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
+              {academicYearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
             </select>
             {errors["AdditionalInformation.AcademicYear"] && (
               <p className="text-red-500 text-sm mt-1">
